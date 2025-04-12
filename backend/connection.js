@@ -40,7 +40,7 @@ const fetchAndUpdate = async (pages = 5) => {
       const existingGame = await gameDB.findOne({ id: game.id });
       if (!existingGame) {
         await gameDB.create(gameData);
-        // console.log("data created");
+        console.log("data created");
       }
     }
   }
