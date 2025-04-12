@@ -19,6 +19,12 @@ export default function CreateAccount() {
               <input id="username" placeholder="gamerguy42" required className="input" />
             </div>
             <div className="space-y-2">
+              <label htmlFor="Name" className="text-sm font-medium">
+                Name
+              </label>
+              <input id="name" placeholder="Aditya Singh" required className="input" />
+            </div>
+            <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
               </label>
@@ -37,15 +43,15 @@ export default function CreateAccount() {
               <input id="confirm-password" type="password" required className="input" />
             </div>
           </div>
-          <div className="flex flex-col space-y-4 mt-6">
-            <button className="btn btn-primary py-2">Create account</button>
-            <div className="text-sm text-center text-white/70">
-              Already have an account?{" "}
-              <Link to="/sign-in" className="text-[#7000FF] hover:underline">
-                Sign in
-              </Link>
-            </div>
-          </div>
+          <div className="flex flex-col space-y-4 mt-14">
+  <button className="btn btn-primary py-2 mt-4">Create account</button>
+  <div className="text-sm text-center text-white/70">
+    Already have an account?{" "}
+    <Link to="/sign-in" className="text-[#7000FF] hover:underline">
+      Sign in
+    </Link>
+  </div>
+</div>
         </div>
       </div>
     </div>
