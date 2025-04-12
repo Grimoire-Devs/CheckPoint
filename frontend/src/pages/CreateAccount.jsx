@@ -3,7 +3,7 @@ import { MainNav } from "../components/MainNav"
 
 export default function CreateAccount() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white bg-[url('https://res.cloudinary.com/dwadgr8xu/image/upload/v1744475904/god-of-war-ragnarok-4k-kratos--10430.jpg.jpg')] bg-cover bg-center">
       <MainNav />
       <div className="container flex items-center justify-center min-h-[calc(100vh-64px)] py-12">
         <div className="form-card w-full max-w-md">
