@@ -8,7 +8,7 @@ export function MainNav() {
 
   return (
     <header className="header">
-      <div className="container header-container">
+      <div className="container header-container ">
         {/* Logo */}
         <div className="logo">
           <div className="logo-dots">
