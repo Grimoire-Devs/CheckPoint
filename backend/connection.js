@@ -16,7 +16,7 @@ const databaseConnect = async () => {
     });
 };
 
-const BASE_URL = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&ordering=-added&page_size=40`;
+const BASE_URL = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&ordering=-released&page_size=40`;
 
 const fetchAndUpdate = async (pages = 5) => {
   await mongoose.connect(process.env.MONGODB_URL).then(() => {
@@ -50,7 +50,7 @@ const fetchAndUpdate = async (pages = 5) => {
 };
 
 if (require.main == module) {
-  fetchAndUpdate(2500);
+  fetchAndUpdate(10);
 }
 
 module.exports = { databaseConnect, fetchAndUpdate };
