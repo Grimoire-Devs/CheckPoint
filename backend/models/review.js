@@ -16,7 +16,7 @@ const reviewSchema = mongoose.Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: "user",
+    ref: "user", 
     required: true,
   },
   liked: Boolean,

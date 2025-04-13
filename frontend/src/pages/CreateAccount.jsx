@@ -36,7 +36,7 @@ export default function CreateAccount() {
                 <label htmlFor="Name" className="text-sm font-medium">
                   Name
                 </label>
-                <input id="name" placeholder="Aditya Singh" required className="input" />
+                <input id="name" placeholder="Aditya Kr Singh" required className="input" />
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
