@@ -50,7 +50,7 @@ const fetchAndUpdate = async (pages = 5) => {
 };
 
 if (require.main == module) {
-  fetchAndUpdate(25);
+  fetchAndUpdate(2500);
 }
 
 module.exports = { databaseConnect, fetchAndUpdate };
