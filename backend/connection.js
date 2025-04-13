@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const axios = require("axios");
-const gameDB = require("./models/game");
+const Game = require("./models/game");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -37,9 +37,9 @@ const fetchAndUpdate = async (pages = 5) => {
         coverImage: game.background_image,
       };
       //   console.log(gameData + "" + i);
-      const existingGame = await gameDB.findOne({ id: game.id });
+      const existingGame = await Game.findOne({ id: game.id });
       if (!existingGame) {
-        await gameDB.create(gameData);
+        await Game.create(gameData);
         // console.log("data created");
       }
     }

@@ -15,10 +15,13 @@ const userSchema = new mongoose.Schema(
          type: String,
          required: true,
       },
+      googleId: {
+         type: String,
+      },
    },
    { timestamps: true }
 );
 
-const userDB = mongoose.model("user", userSchema);
-module.exports = userDB;
+const User = mongoose.model("User", userSchema);
+module.exports = User;
 

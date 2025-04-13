@@ -1,4 +1,4 @@
-const userDB = require("../models/user");
+const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -14,7 +14,7 @@ exports.signup = async (req, res) => {
       if(!email.includes("@")){
          return res.status(400).json({ message: "Please enter a valid email" });
       }
-      const existingUser = await userDB.findOne({ email });
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
          return res.status(400).json({ 
             success: false, 
@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
          });
       }
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await userDB.create({ name: name, email: email, password: hashedPassword });
+      const user = await User.create({ name: name, email: email, password: hashedPassword });
       res.status(201).json({ message: "User created successfully", user });
    } 
    catch (error) {
@@ -40,7 +40,7 @@ exports.signin = async (req, res) => {
       if (!email || !password) {
          return res.status(400).json({ message: "Please fill all fields" });
       }
-      const user = await userDB.findOne({ email });
+      const user = await User.findOne({ email });
       if (!user) {
          return res.status(400).json({
             success: false,
