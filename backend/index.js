@@ -1,11 +1,13 @@
 const express = require("express");
 const cron = require("node-cron");
 const { fetchAndUpdate, databaseConnect } = require("./connection");
+const cookieParser = require("cookie-parser");
 
 const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
+app.use(cookieParser());
 const PORT = process.env.PORT || 8000;
 
 databaseConnect();
