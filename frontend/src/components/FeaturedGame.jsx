@@ -1,9 +1,16 @@
-import { Link } from "react-router-dom"
+import { useState } from "react"
+import { Link } from "react-router-dom"// Import the CSS file for styling
 
 export function FeaturedGame() {
+  const [isAddedToWishlist, setIsAddedToWishlist] = useState(false)
+
+  const handleWishlistClick = () => {
+    setIsAddedToWishlist((prevState) => !prevState) // Toggle the state
+  }
+
   return (
     <div className="featured-game">
-      <div className="featured-game-image">
+      <div className="featured-game-image hover-effect">
         <img src="/game-cover.jpeg" alt="Featured game" />
       </div>
       <div className="featured-game-overlay"></div>
@@ -76,7 +83,14 @@ export function FeaturedGame() {
               </svg>
             </button>
           </Link>
-          <button className="btn btn-outline px-6 py-3">Add to Wishlist</button>
+          <button
+            className={`btn px-6 py-3 ${
+              isAddedToWishlist ? "bg-green-500 text-white" : "btn-outline"
+            }`}
+            onClick={handleWishlistClick}
+          >
+            {isAddedToWishlist ? "Added to Wishlist" : "Add to Wishlist"}
+          </button>
         </div>
       </div>
     </div>
