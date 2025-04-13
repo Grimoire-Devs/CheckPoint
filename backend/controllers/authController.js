@@ -7,22 +7,22 @@ dotenv.config();
 
 exports.signup = async (req, res) => {
    try {
-      const {name, email, password } = req.body;
-      if (!name || !email || !password) {
-         return res.status(400).json({ message: "Please fill all fields" });
+      const {userName, email, password } = req.body;
+      if (!userName || !email || !password) {
+         return res.status(400).json({ message: "Please fill all fields or kindly try different username" });
       }
       if(!email.includes("@")){
          return res.status(400).json({ message: "Please enter a valid email" });
       }
       const existingUser = await User.findOne({ email });
-      if (existingUser) {
+      if (existingUser) { 
          return res.status(400).json({ 
             success: false, 
             message: "User already exists" 
          });
       }
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await User.create({ name: name, email: email, password: hashedPassword });
+      const user = await User.create({ userName: userName, email: email, password: hashedPassword });
       res.status(201).json({ message: "User created successfully", user });
    } 
    catch (error) {
@@ -36,11 +36,16 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-         return res.status(400).json({ message: "Please fill all fields" });
+      const { email, password , userName } = req.body;
+      if ((!email && !userName) || !password) {
+         return res.status(400).json({ message: "Please provide either email or username, and a password." });
       }
-      const user = await User.findOne({ email });
+      let user;
+      if (email) {
+      user = await User.findOne({ email });
+      } else if (userName) {
+      user = await User.findOne({ userName });
+      }
       if (!user) {
          return res.status(400).json({
             success: false,
