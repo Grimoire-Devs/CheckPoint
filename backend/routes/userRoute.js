@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { signup, signin } = require("../controllers/authController");
-const passport = require("passport");
-
+const {logout} = require("../controllers/authController")
 router.post("/signup", signup);
 router.post("/signin", signin);
 router.get("/profile", async (req, res) => {
@@ -13,5 +12,6 @@ router.get("/profile", async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
    }
 });
-
+// Logout route
+router.get("/logout", logout);
 module.exports = router;

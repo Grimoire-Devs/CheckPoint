@@ -6,6 +6,7 @@ const { fetchAndUpdate, databaseConnect } = require("./connection");
 const cookieParser = require("cookie-parser");
 const passport = require("./passport"); // Import your passport configuration
 const dotenv = require("dotenv");
+const {Oauth}  = require("./middlewares/oauth");
 dotenv.config();
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
+  cookie: { secure: false }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -29,19 +31,10 @@ app.get('/auth/google', passport.authenticate('google', {
   scope: ['profile', 'email'],
 }));
 
-app.get('/auth/google/callback', passport.authenticate('google', {
-  failureRedirect: '/login',  // Redirect to login page if authentication fails
-}), (req, res) => {
-  res.redirect('/profile');  // Redirect to user's profile or dashboard
-});
 
-// Logout route
-app.get('/logout', (req, res) => {
-  req.logout((err) => {
-      if (err) return next(err);
-      res.redirect('/');
-  });
-});
+app.get('/auth/google/callback', passport.authenticate('google', {
+  failureRedirect: '/login',
+}), Oauth);
 
 app.use(express.json());
 app.use(cors());

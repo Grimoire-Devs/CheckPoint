@@ -91,21 +91,17 @@ exports.signin = async (req, res) => {
    }
 }
 
-exports.signout = async (req, res) => {
-   try {
-      res.cookie("token", null, {
-         expires: new Date(Date.now()),
-         httpOnly: true,
-      });
-      res.status(200).json({
-         success: true,
-         message: "User logged out successfully",
-      });
-   } catch (error) {
-      console.error(error);
-      res.status(500).json({
-         success: false,
-         message: error.message,
-      });
-   }
-}
+exports.logout = async (req, res, next) => {
+   req.logout(err => {
+     if (err) return next(err);
+ 
+     req.session?.destroy(err => {
+       if (err) return next(err);
+
+       res.clearCookie("token");
+       res.clearCookie("connect.sid"); 
+ 
+       res.redirect("/"); 
+     });
+   });
+};
