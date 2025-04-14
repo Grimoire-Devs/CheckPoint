@@ -19,6 +19,13 @@ app.get("/", (req, res) => {
   res.send("Hello!!");
 });
 
+// const Games = require("./models/game");
+// app.get("/games", async (req, res) => {
+//   const latestGames = await Games.find().limit(50).sort({ released: -1 });
+//   const topRatedGames = await Games.find().limit(50).sort({ rating: -1 });
+//   res.send({ latestGames, topRatedGames });
+// });
+
 app.use(express.json());
 app.use(cors());
 app.use("/api/v1", require("./routes/userRoute"));
