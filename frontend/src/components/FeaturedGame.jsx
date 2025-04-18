@@ -18,7 +18,7 @@ export function FeaturedGame() {
       <div className="featured-game-content">
         <span className="badge featured-game-badge">FEATURED GAME</span>
         <h2 className="featured-game-title">
-          Stellar Odyssey: <span className="text-gradient">Beyond Infinity</span>
+          The Last of<span className="text-gradient"> Us</span>
         </h2>
 
         <div className="featured-game-meta">

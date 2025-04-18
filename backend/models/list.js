@@ -27,7 +27,7 @@ const listSchema = new mongoose.Schema(
     whoCanView: {
       type: String,
       enum: ["public", "private", "friends"],
-      default: "private",
+      default: "public",
       required: true,
     },
     description: {

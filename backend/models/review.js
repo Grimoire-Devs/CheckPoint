@@ -5,7 +5,7 @@ const reviewSchema = mongoose.Schema({
     type: String,
   },
   game: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "game",
     required: true,
   },
@@ -15,7 +15,7 @@ const reviewSchema = mongoose.Schema({
     max: 5,
   },
   createdBy: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "user", 
     required: true,
   },
