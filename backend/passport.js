@@ -1,44 +1,67 @@
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('./models/user');  // Import your User model
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const User = require("./models/user");
+const crypto = require("crypto");
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:8000/auth/google/callback', // Change this to your redirect URI
-},
-async (accessToken, refreshToken, profile, done) => {
-    try {
-        // Check if user already exists in the database
+const generateRandomString = () => {
+  const suffix = crypto.randomBytes(3).toString("hex");
+  return suffix;
+};
+
+async function generateUniqueUserName(baseName) {
+  let userName = baseName.toLowerCase().replace(/\s+/g, "");
+  let exists = await User.findOne({ userName });
+  while (exists) {
+    const suffix = generateRandomString();
+    userName = `${baseName.toLowerCase()}${suffix}`;
+    exists = await User.findOne({ userName });
+  }
+  return userName;
+}
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:8000/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
-            // If the user doesn't exist, create a new one
-            user = new User({
-                googleId: profile.id,
-                name: profile.displayName,
-                email: profile.emails[0].value,
-                // Save other user profile details if needed
-            });
-            await user.save();
+          const firstName = profile.displayName?.split(" ")[0] || "user";
+          const uniqueUserName = await generateUniqueUserName(firstName);
+          user = new User({
+            googleId: profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            userName: uniqueUserName,
+          });
+          await user.save();
         }
 
-        // Return the user object to the session
         done(null, user);
-    } catch (error) {
+      } catch (error) {
         done(error, false);
+      }
     }
-}));
+  )
+);
 
-// Serialize user to store in session
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+  done(null, user._id || user.id);
 });
 
-// Deserialize user from session
-passport.deserializeUser(async (id, done) => {
-    const user = await User.findById(id);
+
+passport.deserializeUser(async (_id, done) => {
+  try {
+    const user = await User.findById(_id);
     done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 module.exports = passport;

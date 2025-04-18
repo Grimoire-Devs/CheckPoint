@@ -1,11 +1,10 @@
 const User = require("../models/user");
 const crypto = require("crypto");
 
-const generateRandomString = ()=>{
+const generateRandomString = () => {
   const suffix = crypto.randomBytes(3).toString("hex");
-  console.log("Generated Suffix:", suffix);
   return suffix;
-}
+};
 
 async function generateUniqueUserName(baseName) {
   let userName = baseName.toLowerCase().replace(/\s+/g, "");
@@ -25,6 +24,7 @@ exports.Oauth = async (req, res) => {
     if (!user.userName) {
       const firstName = user.name?.split(" ")[0] || "user";
       const uniqueUserName = await generateUniqueUserName(firstName);
+
       user.userName = uniqueUserName;
       await user.save();
     }
