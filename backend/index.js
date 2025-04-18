@@ -4,7 +4,7 @@ const cors = require("cors");
 const session = require("express-session");
 const { fetchAndUpdate, databaseConnect } = require("./connection");
 const cookieParser = require("cookie-parser");
-const passport = require("./passport"); // Import your passport configuration
+const passport = require("./passport");
 const dotenv = require("dotenv");
 const { Oauth } = require("./middlewares/oauth");
 dotenv.config();

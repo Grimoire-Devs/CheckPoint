@@ -9,7 +9,7 @@ const generateRandomString = () => {
 async function generateUniqueUserName(baseName) {
   let userName = baseName.toLowerCase().replace(/\s+/g, "");
   let exists = await User.findOne({ userName });
-  while (exists) {
+  while (exists || userName.length < 4) {
     const suffix = generateRandomString();
     userName = `${baseName.toLowerCase()}${suffix}`;
     exists = await User.findOne({ userName });
