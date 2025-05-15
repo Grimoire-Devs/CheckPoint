@@ -7,12 +7,15 @@ const cookieParser = require("cookie-parser");
 const passport = require("./passport");
 const dotenv = require("dotenv");
 const { Oauth } = require("./middlewares/oauth");
+
 dotenv.config();
+const PORT = process.env.PORT || 8000;
 
 const app = express();
-
+app.use(express.json());
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-const PORT = process.env.PORT || 8000;
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -21,7 +24,6 @@ app.use(
     cookie: { secure: false },
   })
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -53,8 +55,6 @@ app.get(
 //   res.send({ latestGames, topRatedGames });
 // });
 
-app.use(cors());
-app.use(express.json());
 app.use("/", require("./routes/userRoute"));
 
 app.listen(PORT, () => {
