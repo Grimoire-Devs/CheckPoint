@@ -14,6 +14,12 @@ const gameSchema = new mongoose.Schema(
     playTime: Number,
     platforms: { type: [String] },
     genre: { type: [String] },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "review",
+      },
+    ],
   },
   { timestamps: true }
 );

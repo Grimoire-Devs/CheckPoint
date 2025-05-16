@@ -15,7 +15,7 @@ const verifyUser = (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    return res.json({ message: "Error!!" });
+    return res.json({ error: error.message });
   }
 };
 
