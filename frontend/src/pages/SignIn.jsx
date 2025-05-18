@@ -1,9 +1,51 @@
 import { Link } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
+import React, { useRef, useState } from "react"
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
+  const accountId = useRef(null);
+  const password = useRef(null);
+  const [error, setError] = useState(null);
+  const [clicked, setClicked] = useState(false);
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const navigate = useNavigate();
+  const clearValues = () => {
+    accountId.current.value = "";
+    password.current.value = "";
+    return;
+  }
 
-  
+  const handleLogin = async (e) => {
+
+    e.preventDefault();
+    setClicked(true);
+
+    const response = await fetch(`${baseUrl}/signin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accountId: accountId.current.value,
+        password: password.current.value,
+      })
+    });
+
+    const data = await response.json();
+    console.log(data);
+    if(!response.ok){
+      setError(`Error Occured ${data.message}`);
+      setClicked(false);
+      return;
+    }
+    clearValues();
+    localStorage.setItem('user',data.user);
+    localStorage.setItem('token', data.user.token);
+    navigate('/profile');
+    setClicked(false);
+  }
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -17,9 +59,9 @@ export default function SignIn() {
           <div className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Email or Username
               </label>
-              <input id="email" type="email" placeholder="m@example.com" required className="input" />
+              <input ref={accountId} id="email" type="email" placeholder="m@example.com or gamerguy34" required className="input" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -30,11 +72,14 @@ export default function SignIn() {
                   Forgot password?
                 </Link>
               </div>
-              <input id="password" type="password" required className="input" />
+              <input ref={password} id="password" type="password" required className="input" />
+            </div>
+            <div >
+              {error && <pre className="text-red">{`${error}`}</pre>}
             </div>
           </div>
           <div className="flex flex-col space-y-4 mt-6">
-            <button className="btn btn-primary py-2">Sign in</button>
+            <button onClick={handleLogin} disabled={clicked} className="btn btn-primary py-2">Sign in</button>
             <div className="text-sm text-center text-white/70">
               Don&apos;t have an account?{" "}
               <Link to="/create-account" className="text-[#7000FF] hover:underline">
