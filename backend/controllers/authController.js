@@ -8,8 +8,8 @@ dotenv.config();
 
 exports.signup = async (req, res) => {
   try {
-    const { userName, email, password } = req.body;
-    if (!userName || !email || !password) {
+    const { username, email, password, name } = req.body;
+    if (!username || !email || !password) {
       return res.status(400).json({
         message: "Please fill all fields or kindly try different username",
       });
@@ -17,16 +17,18 @@ exports.signup = async (req, res) => {
     if (!email.includes("@")) {
       return res.status(400).json({ message: "Please enter a valid email" });
     }
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingUsername = await User.findOne({ userName: username });
+    const existingEmail = await User.findOne({ email });
+    if (existingUsername || existingEmail) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message: existingEmail ? "Email already exists" : "Username already exists",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      userName: userName,
+      name: name,
+      userName: username,
       email: email,
       password: hashedPassword,
     });
