@@ -1,10 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 export function MainNav() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    if (user && token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/sign-in');
+  }
 
   return (
     <header className="header">
@@ -17,7 +33,7 @@ export function MainNav() {
             <div className="logo-dot logo-dot-3 animate-pulse" style={{ animationDelay: "0.4s" }}></div>
           </div>
           <Link to="/">
-            Game<span style={{ color: "#7000FF" }}>Trackr</span>
+            Check<span style={{ color: "#7000FF" }}>Point</span>
           </Link>
         </div>
 
@@ -77,15 +93,20 @@ export function MainNav() {
             </svg>
             <span className="sr-only">Notifications</span>
           </button>
-
-          <div className="hidden md:flex items-center gap-2">
-            <Link to="/sign-in">
-              <button className="btn btn-outline">Sign In</button>
-            </Link>
-            <Link to="/create-account">
-              <button className="btn btn-primary">Create Account</button>
-            </Link>
-          </div>
+          {!isLoggedIn &&
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/sign-in">
+                <button className="btn btn-outline">Sign In</button>
+              </Link>
+              <Link to="/create-account">
+                <button className="btn btn-primary">Create Account</button>
+              </Link>
+            </div>
+          }
+          {isLoggedIn &&
+            <div className="hidden md:flex items-center gap-2">
+              <button onClick={handleLogout} className="btn btn-primary">Logout</button>
+            </div>}
 
           {/* Mobile menu button */}
           <button
@@ -255,34 +276,63 @@ export function MainNav() {
                 <span className="font-medium">Journal</span>
               </Link>
             </nav>
-
-            <div className="mt-auto border-t border-[#252525] py-6 space-y-4">
-              <Link
-                to="/sign-in"
-                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-[#252525] hover:text-[#7000FF] rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            {!isLoggedIn &&
+              <div className="mt-auto border-t border-[#252525] py-6 space-y-4">
+                <Link
+                  to="/sign-in"
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-[#252525] hover:text-[#7000FF] rounded-lg transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                  <polyline points="10 17 15 12 10 7"></polyline>
-                  <line x1="15" y1="12" x2="3" y2="12"></line>
-                </svg>
-                <span className="font-medium">Sign In</span>
-              </Link>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                  </svg>
+                  <span className="font-medium">Sign In</span>
+                </Link>
+                <Link
+                  to="/create-account"
+                  className="flex items-center gap-3 px-4 py-3 bg-[#7000FF] text-white hover:bg-[#8A2BE2] rounded-lg transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                  </svg>
+                  <span className="font-medium">Create Account</span>
+                </Link>
+              </div>
+            }
+            {isLoggedIn &&
               <Link
-                to="/create-account"
                 className="flex items-center gap-3 px-4 py-3 bg-[#7000FF] text-white hover:bg-[#8A2BE2] rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={(e) => {
+                  handleLogout(e);
+                  setIsMenuOpen(false);
+                }}
+
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -300,9 +350,10 @@ export function MainNav() {
                   <line x1="20" y1="8" x2="20" y2="14"></line>
                   <line x1="23" y1="11" x2="17" y2="11"></line>
                 </svg>
-                <span className="font-medium">Create Account</span>
+                <span className="font-medium">Logout</span>
               </Link>
-            </div>
+
+            }
           </div>
         </div>
       )}
