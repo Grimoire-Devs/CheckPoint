@@ -5,14 +5,16 @@ const verifyUser = (req, res, next) => {
     return next();
   }
   const token = req.cookies.token;
-
+  // console.log('token',token);
   if (!token) {
+    console.log("no token");
     return res.json({ message: "Token Empty" });
   }
 
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET);
     req.user = user;
+    console.log('verified');
     next();
   } catch (error) {
     return res.json({ error: error.message });

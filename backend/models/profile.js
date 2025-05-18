@@ -6,16 +6,27 @@ const profileSchema = new mongoose.Schema({
     required: true,
     ref: "user",
   },
-  favourites: [
-    {
-      game: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "game",
-        required: true,
+  favourites: {
+    type: [
+      {
+        game: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "game",
+          unique: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
-      addedAt: { type: Date, default: Date.now },
-    },
-  ],
+    ],
+    default: [
+      { game: null, addedAt: Date.now() },
+      { game: null, addedAt: Date.now() },
+      { game: null, addedAt: Date.now() },
+      { game: null, addedAt: Date.now() },
+    ],
+  },
   reviews: [
     {
       review: {
@@ -66,5 +77,5 @@ const profileSchema = new mongoose.Schema({
   ],
 });
 
-const Profile = mongoose.model('profile', profileSchema);
+const Profile = mongoose.model("profile", profileSchema);
 module.exports = Profile;

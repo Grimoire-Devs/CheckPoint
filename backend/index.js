@@ -57,6 +57,7 @@ app.get(
 
 app.use("/", require("./routes/userRoute"));
 app.use("/review", require("./routes/reviewRoute"));
+app.use("/profile", require("./routes/profileRoute"));
 
 app.listen(PORT, () => {
   console.log("Server Running Successfully " + PORT + "!!");

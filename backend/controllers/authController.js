@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const dotenv = require("dotenv");
+const { handleCreateProfile } = require("./profileController");
 dotenv.config();
 
 exports.signup = async (req, res) => {
@@ -29,6 +30,7 @@ exports.signup = async (req, res) => {
       email: email,
       password: hashedPassword,
     });
+    handleCreateProfile(user._id);
     res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
     console.error(error);
@@ -64,6 +66,7 @@ exports.signin = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
     const payload = user.toObject();
+    console.log(payload);
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
