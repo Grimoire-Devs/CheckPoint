@@ -66,7 +66,7 @@ app.listen(PORT, () => {
   console.log("Server Running Successfully " + PORT + "!!");
 });
 
-cron.schedule("0 0 * * *", async () => {
-  console.log("Updating Game Data");
-  await fetchAndUpdate(25);
+cron.schedule("20 0 * * *", async () => {
+  console.log("Updating Game Data at 12:20 AM");
+  await fetchAndUpdate(5);
 });

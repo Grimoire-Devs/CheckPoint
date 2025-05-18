@@ -73,7 +73,7 @@ exports.signin = async (req, res) => {
       expiresIn: "1d",
     });
 
-    const userObj = user.toObject();
+    const userObj = user;
     userObj.token = token;
     userObj.password = undefined;
     // console.log("User logged in successfully", userObj);
