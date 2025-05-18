@@ -24,7 +24,9 @@ const handleCreateProfile = async function (userId) {
   } else {
     userProfile = await Profile.create({
       user: userId,
-    }).populate("user");
+    });
+    await userProfile.populate("user");
+    return;
     // console.log(userProfile);
   }
   return;
