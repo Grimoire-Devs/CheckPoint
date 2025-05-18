@@ -45,17 +45,17 @@ exports.signup = async (req, res) => {
 
 exports.signin = async (req, res) => {
   try {
-    const { email, password, userName } = req.body;
-    if ((!email && !userName) || !password) {
+    const { accountId, password } = req.body;
+    if (!accountId || !password) {
       return res.status(400).json({
         message: "Please provide either email or username, and a password.",
       });
     }
     let user;
-    if (email) {
-      user = await User.findOne({ email });
-    } else if (userName) {
-      user = await User.findOne({ userName });
+    if (accountId.includes("@")) {
+      user = await User.findOne({ email: accountId });
+    } else {
+      user = await User.findOne({ userName: accountId });
     }
     if (!user) {
       return res.status(400).json({
