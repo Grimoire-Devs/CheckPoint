@@ -42,13 +42,15 @@ const handleUpdateFavs = async function (req, res) {
   const userProfile = await Profile.findOne({ user: user._id });
   try {
     favs.forEach((fav) => {
-      console.log(fav.id, fav.gameId);
+      // console.log(fav.id, fav.gameId);
       userProfile.favourites[fav.id] = {
         game: fav.gameId,
         addedAt: Date.now(),
       };
     });
     await userProfile.save();
+    await userProfile.populate("favourites.game");
+    
     return res.status(201).json({
       message: "Updated Favourites",
       Profile: userProfile,
