@@ -58,23 +58,19 @@ const profileSchema = new mongoose.Schema({
     },
   ],
   followers: [
-    {
-      follower: {
+      {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "user",
-      },
-    },
+      }
   ],
   followings: [
     {
-      following: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "user",
-      },
-    },
-  ],
+    }
+  ]
 });
 
 const Profile = mongoose.model("profile", profileSchema);
