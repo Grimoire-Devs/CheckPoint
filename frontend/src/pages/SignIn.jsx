@@ -2,6 +2,9 @@ import { Link } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
 
 export default function SignIn() {
+
+  
+
   return (
     <div className="min-h-screen bg-black text-white">
       <MainNav />
