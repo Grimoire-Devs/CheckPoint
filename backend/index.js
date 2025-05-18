@@ -59,7 +59,8 @@ app.use("/", require("./routes/userRoute"));
 app.use("/review", require("./routes/reviewRoute"));
 app.use("/profile", require("./routes/profileRoute"));
 app.use("/list", require("./routes/listRoute"));
-app.use("/wishlist", require('./routes/wishlistRoute'));
+app.use("/wishlist", require("./routes/wishlistRoute"));
+app.use("/search", require("./routes/searchRoute"));
 
 app.listen(PORT, () => {
   console.log("Server Running Successfully " + PORT + "!!");
