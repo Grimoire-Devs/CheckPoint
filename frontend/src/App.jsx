@@ -9,6 +9,8 @@ import SignIn from "./pages/SignIn"
 import CreateAccount from "./pages/CreateAccount"
 import Profile from "./pages/Profile"
 import ReviewsRating from "./pages/ReviewsRating"
+import Testing from "./pages/Testing"
+
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/reviews" element={<ReviewsRating />} />
+        <Route path="/testing" element={<Testing/>} />
+
       </Routes>
     </Router>
   )
