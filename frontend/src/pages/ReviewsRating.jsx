@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { MainNav } from "../components/MainNav";
+import { useParams } from "react-router-dom";
 
 export default function ReviewsRating() {
   const [rating, setRating] = useState(0);
@@ -7,26 +8,50 @@ export default function ReviewsRating() {
   const reviewRef = useRef();
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const { id } = useParams();
+  const baseUrl = import.meta.env.VITE_BASE_URL;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!rating || !reviewRef.current.value.trim()) {
       setError("Please provide a rating and a review.");
       return;
     }
     setError("");
-    setSubmitted(true);
-    // Here you would send the review/rating to your backend
+    try {
+      const res = await fetch(`${baseUrl}/review/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          rating,
+          reviewText: reviewRef.current.value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setError(data.error || "Failed to submit review.");
+        return;
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError("Failed to submit review.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <MainNav />
-      <div className="flex flex-1 items-center justify-center" style={{ marginTop: 64 }}>
+      <div
+        className="flex flex-1 items-center justify-center"
+        style={{ marginTop: 64 }}
+      >
         <div className="form-card w-full max-w-md bg-[#151515] border border-[#252525] rounded-lg p-8 shadow-lg">
           <h1 className="text-2xl font-bold mb-4">Leave a Review</h1>
           {submitted ? (
-            <div className="text-green-400 text-center font-semibold">Thank you for your review!</div>
+            <div className="text-green-400 text-center font-semibold">
+              Thank you for your review!
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -40,7 +65,7 @@ export default function ReviewsRating() {
                       onClick={() => setRating(i + 1)}
                       onMouseEnter={() => setHover(i + 1)}
                       onMouseLeave={() => setHover(0)}
-                      aria-label={`Rate ${i + 1} star${i > 0 ? 's' : ''}`}
+                      aria-label={`Rate ${i + 1} star${i > 0 ? "s" : ""}`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +86,9 @@ export default function ReviewsRating() {
                 </div>
               </div>
               <div>
-                <label htmlFor="review" className="block mb-2 font-medium">Your Review</label>
+                <label htmlFor="review" className="block mb-2 font-medium">
+                  Your Review
+                </label>
                 <textarea
                   id="review"
                   ref={reviewRef}
@@ -72,7 +99,12 @@ export default function ReviewsRating() {
                 />
               </div>
               {error && <div className="text-red-400 text-sm">{error}</div>}
-              <button type="submit" className="btn btn-primary w-full py-2 text-lg">Submit Review</button>
+              <button
+                type="submit"
+                className="btn btn-primary w-full py-2 text-lg"
+              >
+                Submit Review
+              </button>
             </form>
           )}
         </div>

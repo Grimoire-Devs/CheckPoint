@@ -5,7 +5,6 @@ const verifyUser = (req, res, next) => {
     return next();
   }
   const token = req.cookies.token;
-  // console.log('token',token);
   if (!token) {
     console.log("no token");
     return res.json({ message: "Token Empty" });

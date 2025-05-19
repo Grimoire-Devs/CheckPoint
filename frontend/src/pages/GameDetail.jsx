@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function GameDetail() {
   const aboutRef = useRef(null);
@@ -13,6 +13,7 @@ export default function GameDetail() {
   const statsRef = useRef(null);
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
+  const navigate = useNavigate();
   const { id } = useParams();
   const [game, setGame] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -438,13 +439,16 @@ export default function GameDetail() {
             <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
               <h3 className="font-bold mb-3 text-white">Where to Play</h3>
               <div className="space-y-3">
-                <button className="btn btn-primary w-full justify-between group">
-                  <span>Steam</span>
+                {game?.platforms.map((e) =>(
+                  <button className="btn btn-primary w-full justify-between group">
+                  <span>{e}</span>
                   <span className="text-white/70 group-hover:text-white">
                     $59.99
                   </span>
                 </button>
-                <button className="btn btn-outline w-full justify-between">
+                ))}
+                
+                {/* <button className="btn btn-outline w-full justify-between">
                   <span>Epic Games Store</span>
                   <span className="text-white/70">$59.99</span>
                 </button>
@@ -455,7 +459,7 @@ export default function GameDetail() {
                 <button className="btn btn-outline w-full justify-between">
                   <span>PlayStation Store</span>
                   <span className="text-white/70">$59.99</span>
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
@@ -608,7 +612,12 @@ export default function GameDetail() {
 
               <div className="flex justify-between items-center mb-6">
                 <p className="text-white/70">328 reviews from the community</p>
-                <button className="btn btn-primary">Write a Review</button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate(`/reviews/${id}`)}
+                >
+                  Write a Review
+                </button>
               </div>
 
               <div className="space-y-6">
