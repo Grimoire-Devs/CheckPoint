@@ -33,9 +33,11 @@ export default function SignIn() {
       })
     });
 
+    // const data = await response.json();
+
     const data = await response.json();
-    // console.log(data);
-    // console.log(data.user);
+    console.log(data);
+    console.log(data.user);
     if (!response.ok) {
       setError(`Error Occured ${data.message}`);
       setClicked(false);
