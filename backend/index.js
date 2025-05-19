@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const passport = require("./passport");
 const dotenv = require("dotenv");
 const { Oauth } = require("./middlewares/oauth");
+const morgan = require("morgan");
 
 dotenv.config();
 const PORT = process.env.PORT || 8000;
@@ -29,6 +30,9 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(morgan("dev"));
+
+app.use(cors());
 
 databaseConnect();
 
@@ -64,6 +68,7 @@ app.use("/profile", require("./routes/profileRoute"));
 app.use("/list", require("./routes/listRoute"));
 app.use("/wishlist", require("./routes/wishlistRoute"));
 app.use("/search", require("./routes/searchRoute"));
+app.use("/games", require("./routes/gameRoute"));
 
 app.listen(PORT, () => {
   console.log("Server Running Successfully " + PORT + "!!");
