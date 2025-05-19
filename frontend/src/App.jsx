@@ -8,6 +8,7 @@ import GameDetail from "./pages/GameDetail"
 import SignIn from "./pages/SignIn"
 import CreateAccount from "./pages/CreateAccount"
 import Profile from "./pages/Profile"
+import ReviewsRating from "./pages/ReviewsRating"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/reviews" element={<ReviewsRating />} />
       </Routes>
     </Router>
   )
