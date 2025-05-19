@@ -32,8 +32,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan("dev"));
 
-app.use(cors());
-
 databaseConnect();
 
 app.get("/", (req, res) => {

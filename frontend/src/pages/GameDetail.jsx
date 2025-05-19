@@ -35,7 +35,8 @@ export default function GameDetail() {
 
   const handleWishlist = async () => {
     await fetch(`${baseUrl}/wishlist/add`, {
-      method: "POST",
+      method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ gameId: id }),
     });
@@ -192,7 +193,7 @@ export default function GameDetail() {
             </button>
             <button
               className="btn btn-outline flex items-center gap-2"
-              // onClick={handleWishlist}
+              onClick={handleWishlist}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
