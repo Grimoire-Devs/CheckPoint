@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom"
 
-export function GameCard({ variant = "default", className = "" }) {
+export function GameCard({ game, variant = "default", className = "" }) {
   return (
-    <Link to="/games/game-slug" className={`block ${className}`}>
+    <Link to={`/games/${game._id}`} className={`block ${className}`}>
       <div className="game-card">
         <div className="game-card-image">
-          <img src="/game-cover.jpeg" alt="Game cover" />
+          <img src={game?.coverImage || "/game-cover.jpeg"} alt={game.title} />
           <div className="game-card-overlay"></div>
         </div>
 
@@ -36,14 +36,13 @@ export function GameCard({ variant = "default", className = "" }) {
           {variant === "featured" || variant === "default" ? (
             <>
               <div className="game-card-badges">
-                <span className="badge" style={{ fontSize: "10px" }}>
-                  RPG
-                </span>
-                <span className="badge" style={{ fontSize: "10px" }}>
-                  Adventure
-                </span>
+                {game.genre?.map((g, i) => (
+                  <span className="badge" style={{ fontSize: "10px" }} key={i}>
+                    {g}
+                  </span>
+                ))}
               </div>
-              <h3 className={`game-card-title ${variant === "featured" ? "text-xl" : "text-base"}`}>Game Title Here</h3>
+              <h3 className={`game-card-title ${variant === "featured" ? "text-xl" : "text-base"}`}>{game.title}</h3>
               <div className="game-card-footer">
                 <div className="rating">
                   <svg
@@ -59,14 +58,16 @@ export function GameCard({ variant = "default", className = "" }) {
                   >
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
-                  <span className="text-xs font-medium text-white">4.5</span>
+                  <span className="text-xs font-medium text-white">{game?.rating}</span>
                 </div>
-                <span className="text-xs text-white/70">2023</span>
+                <span className="text-xs text-white/70">
+                  {game.released ? (typeof game.released === "string" ? game.released.slice(0, 4) : new Date(game.released).getFullYear()) : ""}
+                </span>
               </div>
             </>
           ) : (
             <div className="flex items-center justify-between">
-              <h3 className="game-card-title text-sm line-clamp-1">Game Title Here</h3>
+              <h3 className="game-card-title text-sm line-clamp-1">{game.title}</h3>
               <div className="rating">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +82,7 @@ export function GameCard({ variant = "default", className = "" }) {
                 >
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
-                <span className="text-xs font-medium text-white">4.5</span>
+                <span className="text-xs font-medium text-white">{game.rating?.toFixed(1) ?? "N/A"}</span>
               </div>
             </div>
           )}

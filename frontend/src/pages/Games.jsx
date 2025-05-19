@@ -1,11 +1,34 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MainNav } from "../components/MainNav"
 import { GameCard } from "../components/GameCard"
 
 export default function Games() {
   const [activeTab, setActiveTab] = useState("popular")
+  const [games, setGames] = useState([])
+  const [loading, setLoading] = useState(false)
+  const baseUrl = import.meta.env.VITE_BASE_URL
+
+  useEffect(() => {
+    async function fetchGames() {
+      setLoading(true)
+      let endpoint = "/games/popular"
+      if (activeTab === "latest") endpoint = "/games/latest"
+      else if (activeTab === "upcoming") endpoint = "/games/upcoming"
+      else if (activeTab === "top-rated") endpoint = "/games/top-rated"
+
+      try {
+        const res = await fetch(baseUrl + endpoint)
+        const data = await res.json()
+        setGames(data.games || [])
+      } catch (err) {
+        setGames([])
+      }
+      setLoading(false)
+    }
+    fetchGames()
+  }, [activeTab])
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -91,10 +114,10 @@ export default function Games() {
               Popular
             </button>
             <button
-              onClick={() => setActiveTab("recent")}
-              className={`tab-button ${activeTab === "recent" ? "active" : ""}`}
+              onClick={() => setActiveTab("latest")}
+              className={`tab-button ${activeTab === "latest" ? "active" : ""}`}
             >
-              Recent
+              Latest
             </button>
             <button
               onClick={() => setActiveTab("upcoming")}
@@ -111,11 +134,15 @@ export default function Games() {
           </div>
 
           <div className="mt-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {Array.from({ length: 18 }).map((_, i) => (
-                <GameCard key={i} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center text-white/70">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {games.map((game) => (
+                  <GameCard key={game._id} game={game} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
