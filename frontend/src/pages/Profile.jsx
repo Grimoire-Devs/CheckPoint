@@ -16,7 +16,7 @@ export default function Profile() {
           <div className="w-full md:w-64 space-y-6">
             <div className="flex flex-col items-center text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-black">
-                <img src="/placeholder.svg?height=96&width=96" alt="User" className="w-full h-full object-cover" />
+                <img src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="User" className="w-full h-full object-cover" />
               </div>
               <h1 className="text-xl font-bold mt-4">John Doe</h1>
               <p className="text-sm text-gray-500">Member since 2023</p>

@@ -104,14 +104,42 @@ export function MainNav() {
             </div>
           }
           {isLoggedIn &&
-            <div className="hidden md:flex items-center gap-2">
-              <button onClick={handleLogout} className="btn btn-primary">Logout</button>
-            </div>}
+            <>
+              <div className="hidden md:flex items-center gap-2">
+                <button onClick={handleLogout} className="btn btn-primary">Logout</button>
+              </div>
+              <button
+                className="text-white hover:text-[#7000FF]"
+                onClick={()=>navigate('/profile')}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="profile-icon"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+
+                <span className="sr-only">Account</span>
+              </button>
+            </>
+          }
+
+
+
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden btn btn-icon text-white hover:text-[#7000FF]"
-            onClick={() => setIsMenuOpen(true)}
+            className=" text-white hover:text-[#7000FF] md:hidden"
+            onClick={() => isMenuOpen? setIsMenuOpen(false): setIsMenuOpen(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -128,38 +156,15 @@ export function MainNav() {
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
-            <span className="sr-only">Menu</span>
+            <span className="sr-only">Account</span>
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-lg md:hidden">
+        <div className="relative inset-0 z-50 bg-black/95 backdrop-blur-lg md:hidden">
           <div className="container h-full flex flex-col">
-            <div className="flex items-center justify-between h-16 border-b border-[#252525]">
-              <Link to="/" className="text-2xl font-bold text-white">
-                Game<span style={{ color: "#7000FF" }}>Trackr</span>
-              </Link>
-              <button className="btn btn-icon text-white hover:text-[#7000FF]" onClick={() => setIsMenuOpen(false)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-                <span className="sr-only">Close menu</span>
-              </button>
-            </div>
-
             <nav className="flex flex-col gap-1 py-6">
               <Link
                 to="/"
