@@ -34,14 +34,16 @@ export default function SignIn() {
 
     const data = await response.json();
     console.log(data);
-    if(!response.ok){
+    console.log(data.user);
+    if (!response.ok) {
       setError(`Error Occured ${data.message}`);
       setClicked(false);
       return;
     }
     clearValues();
-    localStorage.setItem('user',data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
     localStorage.setItem('token', data.user.token);
+
     navigate('/profile');
     setClicked(false);
   }

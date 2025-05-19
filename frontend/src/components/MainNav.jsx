@@ -11,10 +11,19 @@ export function MainNav() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    if (user && token) {
-      setIsLoggedIn(true);
+    if (token && user) {
+      try {
+        const parsedUser = JSON.parse(user);
+        if (parsedUser) {
+          setIsLoggedIn(true);
+        }
+      } catch (e) {
+        console.log(e);
+        setIsLoggedIn(false);
+      }
     }
   }, []);
+
   const handleLogout = async (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
@@ -110,7 +119,7 @@ export function MainNav() {
               </div>
               <button
                 className="text-white hover:text-[#7000FF]"
-                onClick={()=>navigate('/profile')}
+                onClick={() => navigate('/profile')}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +148,7 @@ export function MainNav() {
           {/* Mobile menu button */}
           <button
             className=" text-white hover:text-[#7000FF] md:hidden"
-            onClick={() => isMenuOpen? setIsMenuOpen(false): setIsMenuOpen(true)}
+            onClick={() => isMenuOpen ? setIsMenuOpen(false) : setIsMenuOpen(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

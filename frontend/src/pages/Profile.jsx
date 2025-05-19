@@ -5,7 +5,10 @@ import { Link } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState("games")
+  const [ activeTab, setActiveTab ] = useState("games");
+  const [ page, setPage ] = useState(1);
+  const [ user, setUser ] = useState(null);
+
 
   return (
     <div className="min-h-screen bg-black text-white">
