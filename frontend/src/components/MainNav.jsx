@@ -8,6 +8,7 @@ export function MainNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
