@@ -2,6 +2,8 @@ import { Link } from "react-router-dom"
 
 export function GameCard({ game, variant = "default", className = "" }) {
   return (
+    <>
+    { game &&
     <Link to={`/games/${game._id}`} className={`block ${className}`}>
       <div className="game-card">
         <div className="game-card-image">
@@ -89,5 +91,7 @@ export function GameCard({ game, variant = "default", className = "" }) {
         </div>
       </div>
     </Link>
+    }
+    </>
   )
 }
