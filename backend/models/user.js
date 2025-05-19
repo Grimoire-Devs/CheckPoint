@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    passwordResetToken: {
+      type:String,
+    },
+    passwordResetExpires: {
+      type:Date,
+    }  
   },
   { timestamps: true }
 );

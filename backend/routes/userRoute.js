@@ -3,6 +3,7 @@ const router = express.Router();
 const { signup, signin } = require("../controllers/authController");
 const { logout } = require("../controllers/authController");
 const verifyUser = require("../middlewares/auth");
+const {forgotPassword, resetPassword} = require("../controllers/authController");   
 
 router.post("/signup", signup);
 
@@ -19,5 +20,8 @@ router.post("/signin", signin);
 // }); //profile controller
 
 router.get("/logout", logout);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+
 
 module.exports = router;
