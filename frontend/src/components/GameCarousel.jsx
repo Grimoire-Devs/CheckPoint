@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { GameCard } from "./GameCard"
 
-export function GameCarousel({ title, viewAllLink = "/games", games = 10, variant = "default", className = "" }) {
+export function GameCarousel({ title, viewAllLink = "/games", games = [], variant = "default", className = "" }) {
+  console.log("games",games);
   const carouselRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -104,9 +105,9 @@ export function GameCarousel({ title, viewAllLink = "/games", games = 10, varian
 
         {/* Carousel */}
         <div ref={carouselRef} className="game-carousel-scroll scrollbar-hidden" onScroll={checkScrollButtons}>
-          {Array.from({ length: games }).map((_, i) => (
-            <div key={i} className={`game-carousel-item ${variant === "featured" ? "featured" : "default"}`}>
-              <GameCard variant={variant} />
+          {games.map((game) => (
+            <div key={game.id} className={`game-carousel-item ${variant === "featured" ? "featured" : "default"}`}>
+              <GameCard game={game} variant={variant} />
             </div>
           ))}
         </div>

@@ -4,8 +4,61 @@ import { HeroSection } from "../components/HeroSection"
 import { GameCarousel } from "../components/GameCarousel"
 import { FeaturedGame } from "../components/FeaturedGame"
 import { GameCard } from "../components/GameCard"
+import { useState, useEffect } from "react"
 
 export default function Home() {
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const [popularGames, setPopularGames] = useState([]);
+  const [topRatedGames, setTopRatedGames] = useState([]);
+  const [latestGames, setLatestGames] = useState([]);
+  useEffect(() => {
+    async function getPopularGames() {
+      const response = await fetch(`${baseUrl}/games/popular`, {
+        method: "GET",
+        credentials: "include"
+      });
+      const data = await response.json();
+      console.log(data);
+      setPopularGames(data.games);
+      return data;
+    }
+    getPopularGames().then((data) => {
+      console.log(data);
+    })
+  }, [baseUrl]);
+
+  useEffect(() => {
+    async function getTopRatedGames() {
+      const response = await fetch(`${baseUrl}/games/top-rated`, {
+        method: "GET",
+        credentials: "include"
+      });
+      const data = await response.json();
+      console.log(data);
+      setTopRatedGames(data.games);
+      return data;
+    }
+    getTopRatedGames().then((data) => {
+      console.log(data);
+    })
+  }, [baseUrl]);
+
+  useEffect(() => {
+    async function getLatestGames() {
+      const response = await fetch(`${baseUrl}/games/latest`, {
+        method: "GET",
+        credentials: "include"
+      });
+      const data = await response.json();
+      console.log(data);
+      setLatestGames(data.games);
+      return data;
+    }
+    getLatestGames().then((data) => {
+      console.log(data);
+    })
+  }, [baseUrl]);
+
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
       <MainNav />
@@ -21,7 +74,7 @@ export default function Home() {
 
         {/* Popular Games */}
         <section className="container py-10">
-          <GameCarousel title="Popular Games" viewAllLink="/games/popular" games={8} />
+          <GameCarousel title="Popular Games" viewAllLink="/games/popular" games={popularGames} />
         </section>
 
         {/* New Releases */}
@@ -56,16 +109,19 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <GameCard key={i} />
-              ))}
+              {Array.isArray(latestGames) &&
+                latestGames.slice(0, 6).map((game) => (
+                  <GameCard key={game.id} game={game} />
+                ))}
             </div>
+
+
           </div>
         </section>
 
         {/* Top Rated */}
         <section className="container py-16">
-          <GameCarousel title="Top Rated Games" viewAllLink="/games/top-rated" games={8} />
+          <GameCarousel title="Top Rated Games" viewAllLink="/games/top-rated" games={topRatedGames} />
         </section>
 
         {/* CTA Section */}
