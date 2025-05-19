@@ -17,12 +17,13 @@ export default function SignIn() {
   }
 
   const handleLogin = async (e) => {
-
+    // console.log("login");
     e.preventDefault();
     setClicked(true);
 
     const response = await fetch(`${baseUrl}/signin`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -33,15 +34,17 @@ export default function SignIn() {
     });
 
     const data = await response.json();
-    console.log(data);
-    if(!response.ok){
+    // console.log(data);
+    // console.log(data.user);
+    if (!response.ok) {
       setError(`Error Occured ${data.message}`);
       setClicked(false);
       return;
     }
     clearValues();
-    localStorage.setItem('user',data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
     localStorage.setItem('token', data.user.token);
+
     navigate('/profile');
     setClicked(false);
   }

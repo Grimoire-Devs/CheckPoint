@@ -1,11 +1,48 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
+import dayjs from 'dayjs';
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState("games")
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const [activeTab, setActiveTab] = useState("games");
+  // const [ page, setPage ] = useState(1);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        const parsedUser = JSON.parse(user);
+        if (parsedUser) {
+          setUser(parsedUser);
+          // console.log(parsedUser);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, []);
+  useEffect(() => {
+    // const user = JSON.parse(localStorage.getItem('user'));
+    async function fetchData() {
+      const response = await fetch(`${baseUrl}/profile`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await response.json();
+      // console.log(data);
+      return data;
+    }
+    fetchData().then((result) => {
+      // console.log(result.profile);
+      setProfile(result.profile);
+    });
+  }, [baseUrl, user]);
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -16,12 +53,18 @@ export default function Profile() {
           <div className="w-full md:w-64 space-y-6">
             <div className="flex flex-col items-center text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-black">
-                <img src="/placeholder.svg?height=96&width=96" alt="User" className="w-full h-full object-cover" />
+                <img src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="User" className="w-full h-full object-cover" />
               </div>
-              <h1 className="text-xl font-bold mt-4">John Doe</h1>
-              <p className="text-sm text-gray-500">Member since 2023</p>
+              <h1 className="text-xl font-bold mt-4">{user && user.name}</h1>
+              {/* <p className="text-sm text-gray-500">{dayjs(user.createdAt).format("DD MMM YYYY, hh:mm A")}</p> */}
+              <p className="text-sm text-gray-500">{user && dayjs(user.createdAt).format("DD MMM YYYY, hh:mm A")}</p>
+              {
+                profile && Object.keys(profile).forEach((key) => {
+                console.log(`${key}:`, profile[key]);
+              })
+              }
               <div className="flex items-center gap-2 mt-2">
-                <button className="btn btn-outline text-sm flex items-center gap-2">
+                {/* <button className="btn btn-outline text-sm flex items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -39,7 +82,7 @@ export default function Profile() {
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
                   Follow
-                </button>
+                </button> */}
                 <button className="btn btn-outline btn-icon">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
