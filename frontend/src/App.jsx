@@ -10,6 +10,7 @@ import CreateAccount from "./pages/CreateAccount"
 import Profile from "./pages/Profile"
 import ReviewsRating from "./pages/ReviewsRating"
 import Testing from "./pages/Testing"
+import ForgotPassword from "./pages/ForgotPassword"
 
 
 function App() {
@@ -24,6 +25,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/reviews/:id" element={<ReviewsRating />} />
         <Route path="/testing" element={<Testing/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>}/>
+
 
       </Routes>
     </Router>
