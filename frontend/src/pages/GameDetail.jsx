@@ -82,9 +82,11 @@ export default function GameDetail() {
                 {/* <span className="text-gradient">Beyond Infinity</span> */}
               </h1>
               <div className="flex flex-wrap items-center gap-2 mt-3">
-                <span className="badge">RPG</span>
-                <span className="badge">Adventure</span>
-                <span className="badge">Open World</span>
+                {game?.genre.map((g, i) => (
+                  <span className="badge" key={i}>
+                    {g}
+                  </span>
+                ))}
               </div>
               <div className="flex flex-wrap items-center gap-6 mt-4">
                 <div className="flex items-center gap-1.5">
@@ -101,7 +103,7 @@ export default function GameDetail() {
                   >
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
-                  <span className="font-medium">4.8</span>
+                  <span className="font-medium">{game?.rating}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-white/70">
                   <svg
@@ -127,7 +129,13 @@ export default function GameDetail() {
                     <line x1="8" y1="2" x2="8" y2="6"></line>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
-                  <span>2023</span>
+                  <span>
+                    {game?.released
+                      ? typeof game.released === "string"
+                        ? game.released.slice(0, 4)
+                        : new Date(game.released).getFullYear()
+                      : ""}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-white/70">
                   <svg
@@ -159,7 +167,10 @@ export default function GameDetail() {
       <div className="bg-black border-b border-[#252525]">
         <div className="container py-4">
           <div className="flex flex-wrap items-center gap-3">
-            <button className="btn btn-primary flex items-center gap-2">
+            <button
+              className="btn btn-primary flex items-center gap-2"
+              onClick={() => window.open(game?.website, "_blank")}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -211,7 +222,7 @@ export default function GameDetail() {
               </svg>
               Wishlist
             </button>
-            <button className="btn btn-outline flex items-center gap-2">
+            <button className="btn btn-outline flex items-center gap-2" onClick={() => navigate(`/reviews/${id}`)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -309,11 +320,11 @@ export default function GameDetail() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/50">Platforms:</span>
-                  <span className="text-white">PC, PS5, Xbox Series X</span>
+                  <span className="text-white">{game?.platforms?.join(", ")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/50">Genres:</span>
-                  <span className="text-white">RPG, Adventure, Open World</span>
+                  <span className="text-white">{game?.genre?.join(", ")}</span>
                 </div>
               </div>
             </div>
@@ -439,15 +450,15 @@ export default function GameDetail() {
             <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
               <h3 className="font-bold mb-3 text-white">Where to Play</h3>
               <div className="space-y-3">
-                {game?.platforms.map((e) =>(
+                {game?.platforms.map((e) => (
                   <button className="btn btn-primary w-full justify-between group">
-                  <span>{e}</span>
-                  <span className="text-white/70 group-hover:text-white">
-                    $59.99
-                  </span>
-                </button>
+                    <span>{e}</span>
+                    <span className="text-white/70 group-hover:text-white">
+                      $59.99
+                    </span>
+                  </button>
                 ))}
-                
+
                 {/* <button className="btn btn-outline w-full justify-between">
                   <span>Epic Games Store</span>
                   <span className="text-white/70">$59.99</span>
@@ -474,131 +485,10 @@ export default function GameDetail() {
                 </span>
                 About
               </h2>
-              <div className="prose prose-invert max-w-none">
-                <p className="text-white/80 leading-relaxed">
-                  Embark on an epic journey across the cosmos in this
-                  groundbreaking space RPG. Explore uncharted worlds, forge
-                  alliances with alien civilizations, and uncover the mysteries
-                  of an ancient galactic threat that could destroy everything
-                  you hold dear.
-                </p>
-                <p className="text-white/80 leading-relaxed">
-                  As the captain of the starship Nebula, you'll navigate through
-                  stunning star systems, engage in tactical space combat, and
-                  make decisions that will shape the fate of the galaxy. With a
-                  branching narrative and multiple endings, your choices truly
-                  matter in this immersive sci-fi adventure.
-                </p>
-
-                <h3 className="text-white text-xl font-bold mt-8 mb-4">
-                  Key Features
-                </h3>
-                <ul className="text-white/80 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <div className="rounded-full bg-[#7000FF] h-5 w-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>
-                      Vast open universe with over 100 unique planets to explore
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="rounded-full bg-[#7000FF] h-5 w-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>
-                      Deep character customization with unique skill trees and
-                      abilities
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="rounded-full bg-[#7000FF] h-5 w-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>
-                      Immersive storyline with branching narratives and multiple
-                      endings
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="rounded-full bg-[#7000FF] h-5 w-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>
-                      Dynamic faction system where your reputation affects
-                      gameplay
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="rounded-full bg-[#7000FF] h-5 w-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>
-                      Advanced crafting and ship customization systems
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <div
+                className="text-white/80 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: game?.description || "" }}
+              />
             </div>
 
             {/* Reviews Section */}

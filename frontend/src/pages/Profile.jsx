@@ -1,19 +1,34 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { MainNav } from "../components/MainNav"
-import dayjs from 'dayjs';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { MainNav } from "../components/MainNav";
+import dayjs from "dayjs";
+import { GameCard } from "../components/GameCard";
 
 export default function Profile() {
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [activeTab, setActiveTab] = useState("games");
   // const [ page, setPage ] = useState(1);
+  const [games, setGames] = useState([]);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
+    async function fetchGames() {
+      setLoading(true);
+      try {
+        const res = await fetch(`${baseUrl}/games/popular`);
+        const data = await res.json();
+        setGames(data.games || []);
+      } catch (err) {
+        setGames([]);
+      }
+      setLoading(false);
+    }
+    fetchGames();
+    const user = localStorage.getItem("user");
     if (user) {
       try {
         const parsedUser = JSON.parse(user);
@@ -43,7 +58,6 @@ export default function Profile() {
     });
   }, [baseUrl, user]);
 
-
   return (
     <div className="min-h-screen bg-black text-white">
       <MainNav />
@@ -53,16 +67,21 @@ export default function Profile() {
           <div className="w-full md:w-64 space-y-6">
             <div className="flex flex-col items-center text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-black">
-                <img src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="User" className="w-full h-full object-cover" />
+                <img
+                  src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h1 className="text-xl font-bold mt-4">{user && user.name}</h1>
               {/* <p className="text-sm text-gray-500">{dayjs(user.createdAt).format("DD MMM YYYY, hh:mm A")}</p> */}
-              <p className="text-sm text-gray-500">{user && dayjs(user.createdAt).format("DD MMM YYYY, hh:mm A")}</p>
-              {
-                profile && Object.keys(profile).forEach((key) => {
-                console.log(`${key}:`, profile[key]);
-              })
-              }
+              <p className="text-sm text-gray-500">
+                {user && dayjs(user.createdAt).format("DD MMM YYYY, hh:mm A")}
+              </p>
+              {profile &&
+                Object.keys(profile).forEach((key) => {
+                  // console.log(`${key}:`, profile[key]);
+                })}
               <div className="flex items-center gap-2 mt-2">
                 {/* <button className="btn btn-outline text-sm flex items-center gap-2">
                   <svg
@@ -131,11 +150,21 @@ export default function Profile() {
             <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
               <h3 className="font-bold mb-3">Favorite Genres</h3>
               <div className="flex flex-wrap gap-2">
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">RPG</div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">Strategy</div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">Adventure</div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">Simulation</div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">Indie</div>
+                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                  RPG
+                </div>
+                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                  Strategy
+                </div>
+                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                  Adventure
+                </div>
+                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                  Simulation
+                </div>
+                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                  Indie
+                </div>
               </div>
             </div>
           </div>
@@ -146,25 +175,33 @@ export default function Profile() {
               <div className="bg-[#151515] border border-[#252525] p-1 rounded-md flex">
                 <button
                   onClick={() => setActiveTab("games")}
-                  className={`tab-button ${activeTab === "games" ? "active" : ""}`}
+                  className={`tab-button ${
+                    activeTab === "games" ? "active" : ""
+                  }`}
                 >
                   Games
                 </button>
                 <button
                   onClick={() => setActiveTab("reviews")}
-                  className={`tab-button ${activeTab === "reviews" ? "active" : ""}`}
+                  className={`tab-button ${
+                    activeTab === "reviews" ? "active" : ""
+                  }`}
                 >
                   Reviews
                 </button>
                 <button
                   onClick={() => setActiveTab("lists")}
-                  className={`tab-button ${activeTab === "lists" ? "active" : ""}`}
+                  className={`tab-button ${
+                    activeTab === "lists" ? "active" : ""
+                  }`}
                 >
                   Lists
                 </button>
                 <button
                   onClick={() => setActiveTab("diary")}
-                  className={`tab-button ${activeTab === "diary" ? "active" : ""}`}
+                  className={`tab-button ${
+                    activeTab === "diary" ? "active" : ""
+                  }`}
                 >
                   Diary
                 </button>
@@ -198,39 +235,13 @@ export default function Profile() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <Link to="/games/game-slug" key={i} className="game-card">
-                      <div className="game-card-image">
-                        <img
-                          src="/placeholder.svg?height=450&width=300"
-                          alt="Game cover"
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="game-card-overlay"></div>
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <div className="rating">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                            <span className="text-xs font-medium text-white">4.5</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <h3 className="game-card-title text-sm">Game Title Here</h3>
-                        <p className="text-xs text-gray-500 mt-1">2023</p>
-                      </div>
-                    </Link>
+                  {games.length === 0 && (
+                    <div className="col-span-full text-center text-gray-500">
+                      No games found.
+                    </div>
+                  )}
+                  {games.map((game) => (
+                    <GameCard key={game.id} game={game} />
                   ))}
                 </div>
 
@@ -247,7 +258,10 @@ export default function Profile() {
 
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="border border-[#252525] rounded-lg p-4 space-y-3 bg-[#151515]/50">
+                    <div
+                      key={i}
+                      className="border border-[#252525] rounded-lg p-4 space-y-3 bg-[#151515]/50"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-18 rounded overflow-hidden">
                           <img
@@ -324,16 +338,24 @@ export default function Profile() {
                             >
                               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                             </svg>
-                            <span className="ml-1 text-xs text-gray-500">2 weeks ago</span>
+                            <span className="ml-1 text-xs text-gray-500">
+                              2 weeks ago
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <h3 className="font-bold">An amazing gaming experience</h3>
+                      <h3 className="font-bold">
+                        An amazing gaming experience
+                      </h3>
                       <p className="text-white/70 text-sm">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel ultricies
-                        lacinia, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        Sed euismod, nisl vel ultricies lacinia, nisl nisl
+                        aliquam nisl, eget aliquam nisl nisl sit amet nisl.
                       </p>
-                      <Link to="#" className="text-xs text-[#7000FF] hover:underline">
+                      <Link
+                        to="#"
+                        className="text-xs text-[#7000FF] hover:underline"
+                      >
                         Read more
                       </Link>
                     </div>
@@ -347,5 +369,5 @@ export default function Profile() {
         </div>
       </div>
     </div>
-  )
+  );
 }
