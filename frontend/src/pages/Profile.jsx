@@ -121,6 +121,8 @@ export default function Profile() {
               </div>
             </div>
 
+
+            <div className="flex flex-col gap-6">
             <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
               <h3 className="font-bold mb-3">Stats</h3>
               <div className="space-y-2 text-sm">
@@ -167,6 +169,7 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
           {/* Main Content */}
