@@ -4,46 +4,68 @@ const mongoose = require("mongoose");
 const Game = require("../models/game");
 
 router.get("/latest", async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
   try {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const todayStr = today.toISOString().slice(0, 10);
     const games = await Game.find({ released: { $lt: todayStr } })
       .sort({ released: -1 })
-      .limit(18);
-    res.json({ games });
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const totalPages = Math.ceil(await Game.countDocuments() / limit);
+    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    res.json({ games: games, totalPages: totalPages });
   } catch (err) {
     res.json({ error: err.message });
   }
 });
 
 router.get("/upcoming", async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
   try {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const todayStr = today.toISOString().slice(0, 10);
     const games = await Game.find({ released: { $gt: todayStr } })
       .sort({ released: 1 })
-      .limit(18);
-    res.json({ games });
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const totalPages = Math.ceil(await Game.countDocuments() / limit);
+    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    res.json({ games: games, totalPages: totalPages });
+    // res.json({ games });
   } catch (err) {
     res.json({ error: err.message });
   }
 });
 
 router.get("/top-rated", async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
   try {
-    const games = await Game.find().sort({ rating: -1 }).limit(18);
-    res.json({ games });
+    const games = await Game.find().sort({ rating: -1 }).skip((page - 1) * limit).limit(limit);
+    const totalPages = Math.ceil(await Game.countDocuments() / limit);
+    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    res.json({ games: games, totalPages: totalPages });
+    // res.json({ games });
   } catch (err) {
     res.json({ error: err.message });
   }
 });
 
 router.get("/popular", async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
   try {
-    const games = await Game.find().sort({ _id: 1 }).limit(18);
-    res.json({ games });
+    const games = await Game.find().sort({ _id: 1 }).skip((page - 1) * limit).limit(limit);
+    const totalPages = Math.ceil(await Game.countDocuments() / limit);
+    console.log(await Game.countDocuments());
+    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    res.json({ games: games, totalPages: totalPages });
+    // res.json({ games });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

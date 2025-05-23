@@ -7,18 +7,34 @@ import { GameCard } from "../components/GameCard"
 export default function Games() {
   const [activeTab, setActiveTab] = useState("popular")
   const [games, setGames] = useState([])
-  const [loading, setLoading] = useState(false)
-  const baseUrl = import.meta.env.VITE_BASE_URL
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(18);
+  const [totalPages, setTotalPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+
+  const handleIncrement = ()=>{
+    if(page < totalPages){
+      setPage(page+1);
+    }
+  }
+  const handleDecrement = ()=>{
+    if(page > 1){
+      setPage(page - 1);
+    }
+  }
 
   useEffect(() => {
     async function fetchGames() {
       setLoading(true)
-      let endpoint =  `/games/${activeTab}`;
+      let endpoint = `/games/${activeTab}`;
 
       try {
-        const res = await fetch(baseUrl + endpoint)
-        const data = await res.json()
-        setGames(data.games || [])
+        const res = await fetch(baseUrl + endpoint + `?page=${page}&limit=${limit}`);
+        const data = await res.json();
+        console.log(data);
+        setTotalPage(data.totalPages);
+        setGames(data.games || []);
       } catch (err) {
         console.log(err);
         setGames([])
@@ -26,7 +42,7 @@ export default function Games() {
       setLoading(false)
     }
     fetchGames()
-  }, [activeTab])
+  }, [activeTab, baseUrl, page, limit]);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -144,10 +160,30 @@ export default function Games() {
           </div>
         </div>
 
-        {/* Load More Button */}
-        <div className="flex justify-center mt-12">
-          <button className="btn btn-neon px-8 py-3">Load More Games</button>
+        {/* Pagination Controller */}
+        <div className="flex justify-center mt-12 space-x-3">
+          <button
+            disabled={page === 1}
+            onClick={handleDecrement}
+            className={`btn btn-neon px-6 py-2 w-28 ${page === 1 ? "!bg-purple-600 !cursor-not-allowed !opacity-60" : ""
+              }`}
+          >
+            Previous
+          </button>
+          <button className="btn btn-neon px-6 py-2 w-12">
+            {page}
+          </button>
+          <button
+            disabled={page === totalPages}
+            onClick={handleIncrement}
+            className={`btn btn-neon px-6 py-2 w-28 ${page === totalPages ? "!bg-purple-600 !cursor-not-allowed !opacity-60" : ""
+              }`}
+          >
+            Next
+          </button>
+
         </div>
+
       </div>
     </div>
   )
