@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
 import { HeroSection } from "../components/HeroSection"
 import { GameCarousel } from "../components/GameCarousel"
@@ -7,6 +8,7 @@ import { GameCard } from "../components/GameCard"
 import { useState, useEffect } from "react"
 
 export default function Home() {
+  const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [popularGames, setPopularGames] = useState([]);
   const [topRatedGames, setTopRatedGames] = useState([]);
@@ -75,7 +77,7 @@ export default function Home() {
 
         {/* Popular Games */}
         <section className="container py-10">
-          <GameCarousel title="Popular Games" viewAllLink="/games/popular" games={popularGames} />
+          <GameCarousel title="Popular Games" Tab="popular" games={popularGames} />
         </section>
 
         {/* New Releases */}
@@ -86,8 +88,8 @@ export default function Home() {
                 <span className="badge mb-2">FRESH OFF THE PRESS</span>
                 <h2 className="text-2xl md:text-3xl font-bold text-white">New Releases</h2>
               </div>
-              <Link
-                to="/games/new"
+              <button
+                onClick={() => navigate('/games', { state: { activeTab: "latest" } })}
                 className="text-white/70 hover:text-[#7000FF] transition-colors duration-300 flex items-center gap-1 group"
               >
                 View All
@@ -106,7 +108,7 @@ export default function Home() {
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
-              </Link>
+              </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -122,7 +124,7 @@ export default function Home() {
 
         {/* Top Rated */}
         <section className="container py-16">
-          <GameCarousel title="Top Rated Games" viewAllLink="/games/top-rated" games={topRatedGames} />
+          <GameCarousel title="Top Rated Games" Tab="top-rated" games={topRatedGames} />
         </section>
 
         {/* CTA Section */}

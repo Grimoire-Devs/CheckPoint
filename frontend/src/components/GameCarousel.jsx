@@ -1,11 +1,11 @@
 "use client"
-
+import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
-import { Link } from "react-router-dom"
 import { GameCard } from "./GameCard"
 
-export function GameCarousel({ title, viewAllLink = "/games", games = [], variant = "default", className = "" }) {
-  console.log("games",games);
+export function GameCarousel({ title, Tab = "/games", games = [], variant = "default", className = "" }) {
+  const navigate = useNavigate();
+  // console.log("games",games);
   const carouselRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -40,8 +40,10 @@ export function GameCarousel({ title, viewAllLink = "/games", games = [], varian
     <div className={`game-carousel ${className}`}>
       <div className="game-carousel-header">
         <h2 className="game-carousel-title">{title}</h2>
-        {viewAllLink && (
-          <Link to={viewAllLink} className="game-carousel-link group">
+        {Tab && (
+          <button 
+          onClick={()=> navigate('/games', {state: { activeTab : Tab}})}
+          className="game-carousel-link group">
             View All
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +60,7 @@ export function GameCarousel({ title, viewAllLink = "/games", games = [], varian
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
-          </Link>
+          </button>
         )}
       </div>
 

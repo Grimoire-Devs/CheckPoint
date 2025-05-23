@@ -1,11 +1,13 @@
-"use client"
-
+import React from "react"
+import { useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { MainNav } from "../components/MainNav"
 import { GameCard } from "../components/GameCard"
 
 export default function Games() {
-  const [activeTab, setActiveTab] = useState("popular")
+  const location = useLocation();
+  const tab = location.state?.activeTab || "popular";
+  const [activeTab, setActiveTab] = useState(tab);
   const [games, setGames] = useState([])
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(18);

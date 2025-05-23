@@ -63,9 +63,9 @@ export function FeaturedGame() {
         </p>
 
         <div className="featured-game-actions">
-          <Link to="/games/game-slug">
+          <Link to="/games">
             <button className="btn btn-neon group px-6 py-3">
-              Play Now
+              View Now
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
