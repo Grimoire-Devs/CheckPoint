@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const Game = require("../models/game");
 
 router.get("/latest", async (req, res) => {
-  const page = req.query.page;
-  const limit = req.query.limit;
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
   try {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -14,8 +14,7 @@ router.get("/latest", async (req, res) => {
       .sort({ released: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    const totalPages = Math.ceil(await Game.countDocuments() / limit);
-    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    const totalPages = Math.ceil((await Game.countDocuments()) / limit);
     res.json({ games: games, totalPages: totalPages });
   } catch (err) {
     res.json({ error: err.message });
@@ -23,8 +22,8 @@ router.get("/latest", async (req, res) => {
 });
 
 router.get("/upcoming", async (req, res) => {
-  const page = req.query.page;
-  const limit = req.query.limit;
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
   try {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -33,39 +32,38 @@ router.get("/upcoming", async (req, res) => {
       .sort({ released: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    const totalPages = Math.ceil(await Game.countDocuments() / limit);
-    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    const totalPages = Math.ceil((await Game.countDocuments()) / limit);
     res.json({ games: games, totalPages: totalPages });
-    // res.json({ games });
   } catch (err) {
     res.json({ error: err.message });
   }
 });
 
 router.get("/top-rated", async (req, res) => {
-  const page = req.query.page;
-  const limit = req.query.limit;
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
   try {
-    const games = await Game.find().sort({ rating: -1 }).skip((page - 1) * limit).limit(limit);
-    const totalPages = Math.ceil(await Game.countDocuments() / limit);
-    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    const games = await Game.find()
+      .sort({ rating: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const totalPages = Math.ceil((await Game.countDocuments()) / limit);
     res.json({ games: games, totalPages: totalPages });
-    // res.json({ games });
   } catch (err) {
     res.json({ error: err.message });
   }
 });
 
 router.get("/popular", async (req, res) => {
-  const page = req.query.page;
-  const limit = req.query.limit;
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
   try {
-    const games = await Game.find().sort({ _id: 1 }).skip((page - 1) * limit).limit(limit);
-    const totalPages = Math.ceil(await Game.countDocuments() / limit);
-    console.log(await Game.countDocuments());
-    // const paginatedGames = games.slice((page - 1) * limit, page * limit);
+    const games = await Game.find()
+      .sort({ _id: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const totalPages = Math.ceil((await Game.countDocuments()) / limit);
     res.json({ games: games, totalPages: totalPages });
-    // res.json({ games });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

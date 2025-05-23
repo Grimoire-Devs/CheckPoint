@@ -11,6 +11,7 @@ export default function Home() {
   const [popularGames, setPopularGames] = useState([]);
   const [topRatedGames, setTopRatedGames] = useState([]);
   const [latestGames, setLatestGames] = useState([]);
+
   useEffect(() => {
     async function getPopularGames() {
       const response = await fetch(`${baseUrl}/games/popular`, {

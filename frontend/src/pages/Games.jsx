@@ -13,13 +13,13 @@ export default function Games() {
   const [loading, setLoading] = useState(false);
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
-  const handleIncrement = ()=>{
-    if(page < totalPages){
-      setPage(page+1);
+  const handleIncrement = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
     }
   }
-  const handleDecrement = ()=>{
-    if(page > 1){
+  const handleDecrement = () => {
+    if (page > 1) {
       setPage(page - 1);
     }
   }
@@ -32,7 +32,7 @@ export default function Games() {
       try {
         const res = await fetch(baseUrl + endpoint + `?page=${page}&limit=${limit}`);
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
         setTotalPage(data.totalPages);
         setGames(data.games || []);
       } catch (err) {
@@ -122,25 +122,39 @@ export default function Games() {
         <div className="mb-8">
           <div className="bg-[#151515] border border-[#252525] p-1 rounded-md flex">
             <button
-              onClick={() => setActiveTab("popular")}
+              onClick={() => {
+                setActiveTab("popular");
+                setPage(1);
+              }}
               className={`tab-button ${activeTab === "popular" ? "active" : ""}`}
             >
               Popular
             </button>
             <button
-              onClick={() => setActiveTab("latest")}
+              onClick={() => {
+                setActiveTab("latest")
+                setPage(1);
+              }}
               className={`tab-button ${activeTab === "latest" ? "active" : ""}`}
             >
               Latest
             </button>
             <button
-              onClick={() => setActiveTab("upcoming")}
+              onClick={() => {
+                setActiveTab("upcoming")
+                setPage(1)
+              }
+              }
               className={`tab-button ${activeTab === "upcoming" ? "active" : ""}`}
             >
               Upcoming
             </button>
             <button
-              onClick={() => setActiveTab("top-rated")}
+              onClick={() => {
+                setActiveTab("top-rated")
+                setPage(1)
+              }
+              }
               className={`tab-button ${activeTab === "top-rated" ? "active" : ""}`}
             >
               Top Rated
