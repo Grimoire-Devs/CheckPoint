@@ -1,6 +1,18 @@
 import { Link } from "react-router-dom"
+import { useState, useEffect } from "react";
 
 export function HeroSection() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(()=>{
+    const user = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    if(user && token){
+      setIsLoggedIn(true);
+    }else{
+      setIsLoggedIn(false);
+    }
+  },[]);
+
   return (
     <section className="hero-section">
       {/* Background image with color grading overlay */}
@@ -29,7 +41,7 @@ export function HeroSection() {
           a community that shares your passion.
         </p>
 
-        <Link to="/create-account">
+        <Link to={isLoggedIn ? "/games" : "/create-account"}>
           <button className="btn btn-neon group px-6 py-3 text-lg font-medium">
             Get started — it's free!
             <svg
