@@ -13,16 +13,14 @@ export default function Games() {
   useEffect(() => {
     async function fetchGames() {
       setLoading(true)
-      let endpoint = "/games/popular"
-      if (activeTab === "latest") endpoint = "/games/latest"
-      else if (activeTab === "upcoming") endpoint = "/games/upcoming"
-      else if (activeTab === "top-rated") endpoint = "/games/top-rated"
+      let endpoint =  `/games/${activeTab}`;
 
       try {
         const res = await fetch(baseUrl + endpoint)
         const data = await res.json()
         setGames(data.games || [])
       } catch (err) {
+        console.log(err);
         setGames([])
       }
       setLoading(false)
@@ -59,7 +57,7 @@ export default function Games() {
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="search" placeholder="Search games..." className="input pl-10 w-full md:w-[300px]" />
+              <input type="search" placeholder="    Search games..." className="input pl-10 w-full md:w-[300px]" />
             </div>
             <button className="btn btn-outline btn-icon">
               <svg
