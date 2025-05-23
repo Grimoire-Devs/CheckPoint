@@ -31,7 +31,7 @@ router.get("/", async (req, res) => {
       },
       { $sort: { score: -1 } },
     ]);
-    res.json(games);
+    res.json({games : games});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

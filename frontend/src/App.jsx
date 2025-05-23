@@ -11,6 +11,8 @@ import Profile from "./pages/Profile"
 import ReviewsRating from "./pages/ReviewsRating"
 import Testing from "./pages/Testing"
 import ForgotPassword from "./pages/ForgotPassword"
+import SearchPage from "./pages/SearchPage"
+import { MainNav } from "./components/MainNav"
 
 
 function App() {
@@ -26,7 +28,7 @@ function App() {
         <Route path="/reviews/:id" element={<ReviewsRating />} />
         <Route path="/testing" element={<Testing/>} />
         <Route path="/forgot-password" element={<ForgotPassword/>}/>
-
+        <Route path="/search" element={<><MainNav/><SearchPage/></>}/>
 
       </Routes>
     </Router>

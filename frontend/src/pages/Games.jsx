@@ -59,24 +59,32 @@ export default function Games() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative w-full md:w-auto flex-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(255,255,255,0.5)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="absolute left-3 top-1/2 -translate-y-1/2"
+            {/* <div className="relative w-full md:w-auto flex-1">
+              <input
+                type="search"
+                placeholder="Search games..."
+                className="input w-full md:w-[300px] !pr-10"
+              />
+              <button
+                onClick={() => navigate('/profile')}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input type="search" placeholder="    Search games..." className="input pl-10 w-full md:w-[300px]" />
-            </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.5)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </div> */}
             <button className="btn btn-outline btn-icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

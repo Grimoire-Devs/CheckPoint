@@ -1,5 +1,4 @@
-"use client"
-
+import React from "react";
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
@@ -7,8 +6,9 @@ import { useNavigate } from "react-router-dom";
 export function MainNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
@@ -58,33 +58,43 @@ export function MainNav() {
           <Link to="/lists" className="nav-link">
             LISTS
           </Link>
-          <Link to="/members" className="nav-link">
-            MEMBERS
-          </Link>
-          <Link to="/journal" className="nav-link">
-            JOURNAL
-          </Link>
         </nav>
 
         {/* Actions */}
         <div className="actions">
-          <button className="btn btn-icon text-white hover:text-[#7000FF]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="relative w-full md:w-auto flex-1">
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  navigate('/search', { state: { searchQuery } });
+                }
+              }}
+              placeholder="Search Games..."
+              className="input w-full md:w-[300px] !pr-10"
+            />
+            <button
+              onClick={() => navigate('/search', { state: { searchQuery: searchQuery } })}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
             >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <span className="sr-only">Search</span>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgba(255,255,255,0.5)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
 
           <button className="btn btn-icon text-white hover:text-[#7000FF] hidden md:flex">
             <svg
@@ -245,50 +255,6 @@ export function MainNav() {
                   <line x1="3" y1="18" x2="3.01" y2="18"></line>
                 </svg>
                 <span className="font-medium">Lists</span>
-              </Link>
-              <Link
-                to="/members"
-                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-[#252525] hover:text-[#7000FF] rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span className="font-medium">Members</span>
-              </Link>
-              <Link
-                to="/journal"
-                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-[#252525] hover:text-[#7000FF] rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-                <span className="font-medium">Journal</span>
               </Link>
             </nav>
             {!isLoggedIn &&
