@@ -4,7 +4,7 @@ const { signup, signin } = require("../controllers/authController");
 const { logout } = require("../controllers/authController");
 const verifyUser = require("../middlewares/auth");
 const {forgotPassword, resetPassword} = require("../controllers/authController");   
-
+const { followUser, unfollowUser, getFollowers, getFollowing } = require("../controllers/userController");
 router.post("/signup", signup);
 
 router.post("/signin", signin);
@@ -22,6 +22,9 @@ router.post("/signin", signin);
 router.get("/logout", logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
-
+router.post("/follow/:id", verifyUser, followUser);
+router.post("/unfollow/:id", verifyUser, unfollowUser);
+router.get("/followers/:id", verifyUser,getFollowers);
+router.get("/following/:id", verifyUser, getFollowing);
 
 module.exports = router;
