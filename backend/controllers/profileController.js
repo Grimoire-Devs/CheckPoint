@@ -35,6 +35,7 @@ const handleCreateProfile = async function (userId) {
 const handleUpdateFavs = async function (req, res) {
   const user = req.user;
   const favs = req.body.favs;
+  // console.log(favs);
 
   if (!user) {
     return res

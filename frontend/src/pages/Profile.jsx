@@ -1,11 +1,9 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
 import dayjs from "dayjs";
-
-
 import { GameCard } from "../components/GameCard";
 
 export default function Profile() {
@@ -16,6 +14,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [favourites,setFavourites]=useState(null);
 
   useEffect(() => {
     async function fetchGames() {
@@ -43,6 +42,23 @@ export default function Profile() {
       }
     }
   }, []);
+
+  useEffect(() => {
+      async function getFavourites() {
+        const response = await fetch(`${baseUrl}/profile`, {
+          method: "GET",
+          credentials: "include"
+        });
+        const data = await response.json();
+        console.log(data);
+        setFavourites(data.favourites);
+        return data;
+      }
+      getFavourites().then((data) => {
+        console.log(data);
+      })
+    }, [baseUrl]);
+
   useEffect(() => {
     // const user = JSON.parse(localStorage.getItem('user'));
     async function fetchData() {
@@ -51,7 +67,7 @@ export default function Profile() {
         credentials: "include",
       });
       const data = await response.json();
-      // console.log(data);
+      console.log(data);
       return data;
     }
     fetchData().then((result) => {
@@ -210,6 +226,11 @@ export default function Profile() {
                 >
                   Diary
                 </button>
+                <button onClick={()=> setActiveTab("favourite")}
+                  className={`tab-button ${
+                    activeTab === "favourite" ? "active" : ""
+                  }`}>Favourites
+                  </button>
               </div>
             </div>
 
@@ -251,6 +272,25 @@ export default function Profile() {
                 </div>
 
                 <button className="btn btn-outline w-full">Load more</button>
+              </div>
+            )}
+
+            {activeTab === "favourite" && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold">Favourites</h2>
+                </div>
+
+                <div className="grid md:grid-cols-4  gap-4">
+                  {games.length === 0 && (
+                    <div className="col-span-full text-center text-gray-500">
+                      No games found.
+                    </div>
+                  )}
+                  {/* {games.map((favourites) => (
+                    <GameCard key={favourites._id} game={favourites} />
+                  ))} */}
+                </div>
               </div>
             )}
 
