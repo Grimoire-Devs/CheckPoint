@@ -552,9 +552,10 @@ button {
 .featured-game {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius);
+  /* border-radius: var(--radius); */
   background-color: var(--card);
   margin-bottom: 2rem;
+  width:100%;
 }
 
 .featured-game-image {
@@ -588,7 +589,6 @@ button {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem;
   z-index: 2;
 }
 

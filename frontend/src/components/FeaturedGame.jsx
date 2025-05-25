@@ -36,7 +36,9 @@ export function FeaturedGame() {
             >
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
-            <span className="text-white font-medium">4.8</span>
+            <span className="font-medium" style={{ color: '#111', background: 'rgba(255,255,255,0.85)', padding: '2px 8px', borderRadius: '6px' }}>{/* force dark text on light bg */}
+              4.8
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <svg
