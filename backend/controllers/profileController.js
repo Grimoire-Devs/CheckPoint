@@ -8,8 +8,7 @@ const handleGetProfile = async function (req, res) {
       .json({ status: 400, message: "Login Again to Continue..." });
   }
   try {
-    const userProfile = await Profile.findOne({ user: user._id });
-    // console.log("profile",userProfile);
+    const userProfile = await Profile.findOne({ user: user._id }); // console.log("profile",userProfile);
     return res.status(200).json({ profile: userProfile });
   } catch (e) {
     return res.status(500).json({ error: `Error occurred ${e}` });
@@ -44,19 +43,23 @@ const handleUpdateFavs = async function (req, res) {
   }
   const userProfile = await Profile.findOne({ user: user._id });
   try {
+    const update = {};
     favs.forEach((fav) => {
-      // console.log(fav.id, fav.gameId);
-      userProfile.favourites[fav.id] = {
+      update[`favourites.${fav.id}`] = {
         game: fav.gameId,
         addedAt: Date.now(),
       };
     });
-    await userProfile.save();
-    await userProfile.populate("favourites.game");
-    
+
+    await Profile.updateOne({ user: user._id }, { $set: update });
+
+    const updatedProfile = await Profile.findOne({ user: user._id }).populate(
+      "favourites.game"
+    );
+
     return res.status(201).json({
       message: "Updated Favourites",
-      Profile: userProfile,
+      Profile: updatedProfile,
     });
   } catch (e) {
     return res.json({ error: `Error occurred ${e}` });
