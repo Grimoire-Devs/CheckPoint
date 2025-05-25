@@ -51,7 +51,7 @@ const handleUpdateFavs = async function (req, res) {
   try {
     const update = {};
     for (const fav of favs) {
-      const key = `favourites.${fav.id}`;
+      const key = `favourites.${fav.id}`
 
       const alreadyExists = Object.values(userProfile.favourites).some(
         (f) => String(f.game?._id || f.game) === String(fav.gameId)
