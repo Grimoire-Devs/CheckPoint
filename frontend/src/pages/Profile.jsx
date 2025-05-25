@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
@@ -28,7 +27,6 @@ export default function Profile() {
       } catch (err) {
         setGames([]);
       }
-      setLoading(false);
     }
     fetchGames();
     const user = localStorage.getItem("user");
@@ -43,25 +41,11 @@ export default function Profile() {
         console.log(e);
       }
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-      async function getFavourites() {
-        const response = await fetch(`${baseUrl}/profile`, {
-          method: "GET",
-          credentials: "include"
-        });
-        const data = await response.json();
-        console.log(data);
-        setFavourites(data.favourites);
-        return data;
-      }
-      getFavourites().then((data) => {
-        console.log(data);
-      })
-    }, [baseUrl]);
-
-  useEffect(() => {
+    setLoading(true);
     // const user = JSON.parse(localStorage.getItem('user'));
     async function fetchData() {
       const response = await fetch(`${baseUrl}/profile`, {
@@ -75,7 +59,9 @@ export default function Profile() {
     fetchData().then((result) => {
       // console.log(result.profile);
       setProfile(result.profile);
+      setFavourites(result.profile.favourites);
     });
+    setLoading(false);
   }, [baseUrl, user]);
 
   return (
@@ -284,14 +270,14 @@ export default function Profile() {
                 </div>
 
                 <div className="grid md:grid-cols-4  gap-4">
-                  {games.length === 0 && (
+                  {favourites.length === 0 && (
                     <div className="col-span-full text-center text-gray-500">
                       No games found.
                     </div>
                   )}
-                  {/* {games.map((favourites) => (
-                    <GameCard key={favourites._id} game={favourites} />
-                  ))} */}
+                  {favourites.map((fav) => (
+                    <GameCard key={fav?.game?._id} game={fav?.game} />
+                  ))}
                 </div>
               </div>
             )}
