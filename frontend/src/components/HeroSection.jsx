@@ -26,17 +26,17 @@ export function HeroSection() {
       <div className="hero-grid"></div>
 
       {/* Content */}
-      <div className="hero-content">
+      <div className="hero-content" style={{ color: '#fff' }}>
         <h1 className="hero-title">
-          <span className="block mb-2 text-white">Track games you've</span>
-          <span className="block mb-2 text-gradient animate-gradient-shift">played.</span>
-          <span className="block mb-2 text-white">Save those you want to</span>
-          <span className="block mb-2 text-gradient animate-gradient-shift">play.</span>
-          <span className="block mb-2 text-white">Tell your friends what's</span>
-          <span className="block text-gradient animate-gradient-shift">good.</span>
+          <span className="block mb-2" style={{ color: '#fff' }}>Track games you've</span>
+          <span className="block mb-2 text-gradient animate-gradient-shift" style={{ color: '#fff' }}>played.</span>
+          <span className="block mb-2" style={{ color: '#fff' }}>Save those you want to</span>
+          <span className="block mb-2 text-gradient animate-gradient-shift" style={{ color: '#fff' }}>play.</span>
+          <span className="block mb-2" style={{ color: '#fff' }}>Tell your friends what's</span>
+          <span className="block text-gradient animate-gradient-shift" style={{ color: '#fff' }}>good.</span>
         </h1>
 
-        <p className="hero-description">
+        <p className="hero-description" style={{ color: '#fff' }}>
           Join the ultimate social network for gamers. Track your gaming journey, discover new titles, and connect with
           a community that shares your passion.
         </p>
