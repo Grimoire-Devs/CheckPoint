@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+import { ThemeContext } from "../ThemeContext";
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
@@ -8,6 +9,7 @@ export function MainNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { theme, setTheme } = useContext(ThemeContext);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -31,6 +33,8 @@ export function MainNav() {
     localStorage.removeItem('token');
     navigate('/sign-in');
   }
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   return (
     <header className="header">
@@ -61,7 +65,7 @@ export function MainNav() {
         </nav>
 
         {/* Actions */}
-        <div className="actions">
+        <div className={`actions ${theme === "light" ? "text-black" : "text-white"}`}> 
           <div className="relative w-full md:w-auto flex-1">
             <input
               type="search"
@@ -73,11 +77,11 @@ export function MainNav() {
                 }
               }}
               placeholder="Search Games..."
-              className="input w-full md:w-[300px] !pr-10"
+              className={`input w-full md:w-[300px] !pr-10 ${theme === "light" ? "bg-white text-black border-gray-300" : "bg-[#151515] text-white border-[#252525]"}`}
             />
             <button
               onClick={() => navigate('/search', { state: { searchQuery: searchQuery } })}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme === "light" ? "text-black" : "text-white"}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +89,7 @@ export function MainNav() {
                 height="16"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="rgba(255,255,255,0.5)"
+                stroke={theme === "light" ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)"}
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -96,7 +100,7 @@ export function MainNav() {
             </button>
           </div>
 
-          <button className="btn btn-icon text-white hover:text-[#7000FF] hidden md:flex">
+          <button className={`btn btn-icon hidden md:flex ${theme === "light" ? "text-black hover:text-[#7000FF]" : "text-white hover:text-[#7000FF]"}`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -153,8 +157,24 @@ export function MainNav() {
             </>
           }
 
-
-
+          {/* Theme Toggle Button */}
+          <button
+            className="btn btn-outline mx-2"
+            aria-label="Toggle dark/light mode"
+            onClick={toggleTheme}
+            style={{ minWidth: 40 }}
+          >
+            {theme === "dark" ? (
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" />
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+              </svg>
+            )}
+          </button>
 
           {/* Mobile menu button */}
           <button
