@@ -178,3 +178,76 @@
   background-color: var(--card);
   padding: 1.5rem;
 }
+
+body.dark {
+  background: #111;
+  color: #fff;
+}
+body.light {
+  background: #fff;
+  color: #111;
+}
+
+/* .featured-game{
+  color:#fff;
+} */
+
+/* Optional: override specific elements if needed */
+.bg-black {
+  background: #111 !important;
+}
+.bg-white {
+  background: #fff !important;
+}
+.text-white {
+  color: #fff !important;
+}
+.text-black {
+  color: #111 !important;
+}
+body.light .header, body.light .container.header-container, body.light .nav, body.light .actions {
+  background: #fff !important;
+  color: #111 !important;
+}
+body.light .nav-link {
+  color: #111 !important;
+}
+body.light .btn,
+body.light .btn-outline {
+  color: #111 !important;
+  border-color: #7000FF !important;
+  background: #fff !important;
+}
+body.light .btn-primary {
+  background: #7000FF !important;
+  color: #fff !important;
+}
+body.light .input {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #ccc !important;
+}
+body.light .logo-dot {
+  background: #7000FF !important;
+}
+body.light .profile-icon {
+  color: #111 !important;
+}
+body.light .text-white {
+  color: #111 !important;
+}
+body.light .bg-black {
+  background: #fff !important;
+}
+body.light .text-black {
+  color: #111 !important;
+}
+body.light .bg-light-gray {
+  background: #f3f3f3 !important;
+}
+body.light .border-light-gray {
+  border-color: #ccc !important;
+}
+body.light .hover-text-purple:hover {
+  color: #7000FF !important;
+}

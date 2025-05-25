@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import "./App.css"
+import { useState, useEffect } from "react";
+import { ThemeContext } from "./ThemeContext";
 
 // Pages
 import Home from "./pages/Home"
@@ -16,22 +18,33 @@ import { MainNav } from "./components/MainNav"
 
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/games" element={<Games />} />
-        <Route path="/games/:id" element={<GameDetail />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/reviews/:id" element={<ReviewsRating />} />
-        <Route path="/testing" element={<Testing/>} />
-        <Route path="/forgot-password" element={<ForgotPassword/>}/>
-        <Route path="/search" element={<><MainNav/><SearchPage/></>}/>
+  const [theme, setTheme] = useState(() => {
+    // Try to get theme from localStorage, default to 'dark'
+    return localStorage.getItem("theme") || "dark";
+  });
 
-      </Routes>
-    </Router>
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "dark" : "light";
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/games/:id" element={<GameDetail />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/reviews/:id" element={<ReviewsRating />} />
+          <Route path="/testing" element={<Testing/>} />
+          <Route path="/forgot-password" element={<ForgotPassword/>}/>
+          <Route path="/search" element={<><MainNav/><SearchPage/></>}/>
+        </Routes>
+      </Router>
+    </ThemeContext.Provider>
   )
 }
 

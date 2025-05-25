@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
 import dayjs from "dayjs";
 import { GameCard } from "../components/GameCard";
+import { ThemeContext } from "../ThemeContext";
 
 export default function Profile() {
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -15,6 +16,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [favourites,setFavourites]=useState(null);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     async function fetchGames() {
@@ -77,7 +79,7 @@ export default function Profile() {
   }, [baseUrl, user]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
       <MainNav />
       <div className="container py-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -141,7 +143,7 @@ export default function Profile() {
 
 
             <div className="flex flex-col gap-6">
-            <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
+            <div className={`border border-[#252525] rounded-lg p-4 ${theme === "light" ? "bg-light-gray border-light-gray text-black" : "bg-[#151515]/50 text-white"}`}>
               <h3 className="font-bold mb-3">Stats</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
