@@ -51,13 +51,13 @@ export default function CreateAccount() {
         setClicked(false);
         return;
       }
-      setError("Account Created Successfully. Login to continue.");
+      setError("Account Created Successfully.");
       clearValues();
       setClicked(false);
 
       setTimeout(() => {
         navigate('/sign-in');
-      }, 1000);
+      }, 2000);
     }
     catch (e) {
       setError("An unexpected error occurred.");

@@ -40,6 +40,9 @@ export default function SearchPage() {
     const [hasSearched, setHasSearched] = useState(false)
     const baseUrl = import.meta.env.VITE_BASE_URL;
 
+    useEffect(() => {
+        setSearchQuery(location.state?.searchQuery || "");
+    }, [location.state]);
 
     useEffect(() => {
         setIsSearching(true);
