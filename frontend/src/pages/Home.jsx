@@ -5,6 +5,7 @@ import { HeroSection } from "../components/HeroSection"
 import { GameCarousel } from "../components/GameCarousel"
 import { FeaturedGame } from "../components/FeaturedGame"
 import { GameCard } from "../components/GameCard"
+import Footer from "../components/Footer"
 import { useState, useEffect } from "react"
 
 export default function Home() {
@@ -128,7 +129,7 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="cta-section">
+        {/* {!isLoggedIn && <section className="cta-section">
           <div className="cta-background">
             <div className="cta-gradient"></div>
             <div className="cta-glow"></div>
@@ -166,7 +167,8 @@ export default function Home() {
               <button className="btn btn-outline px-6 py-3">Learn More</button>
             </div>
           </div>
-        </section>
+        </section>} */}
+        <Footer/>
       </main>
     </div>
   )
