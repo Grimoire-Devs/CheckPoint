@@ -14,8 +14,9 @@ import ReviewsRating from "./pages/ReviewsRating"
 import Testing from "./pages/Testing"
 import ForgotPassword from "./pages/ForgotPassword"
 import SearchPage from "./pages/SearchPage"
+import Lists from "./pages/Lists";
 import { MainNav } from "./components/MainNav"
-
+import ListDetails from "./pages/ListDetails";
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -34,6 +35,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/games" element={<Games />} />
+          <Route path="/lists" element={<Lists/>} />
+          <Route path="/lists/:id" element={<ListDetails/>} />
           <Route path="/games/:id" element={<GameDetail />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/create-account" element={<CreateAccount />} />

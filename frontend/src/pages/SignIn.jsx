@@ -39,7 +39,7 @@ export default function SignIn() {
     console.log(data);
     console.log(data.user);
     if (!response.ok) {
-      setError(`Error Occured ${data.message}`);
+      setError(`Error: ${data.message}`);
       setClicked(false);
       return;
     }

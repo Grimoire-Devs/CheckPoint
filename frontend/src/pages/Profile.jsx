@@ -5,16 +5,18 @@ import { MainNav } from "../components/MainNav";
 import dayjs from "dayjs";
 import { GameCard } from "../components/GameCard";
 import { ThemeContext } from "../ThemeContext";
+import ListCard from "../components/ListCard";
 
 export default function Profile() {
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [activeTab, setActiveTab] = useState("games");
   // const [ page, setPage ] = useState(1);
   const [games, setGames] = useState([]);
+  const [lists, setLists] = useState([]);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [favourites,setFavourites]=useState(null);
+  const [favourites, setFavourites] = useState(null);
   const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function Profile() {
       try {
         const res = await fetch(`${baseUrl}/games/popular`);
         const data = await res.json();
-        setGames(data.games || []);
+        setGames(data.games);
       } catch (err) {
         setGames([]);
       }
@@ -60,6 +62,7 @@ export default function Profile() {
       // console.log(result.profile);
       setProfile(result.profile);
       setFavourites(result.profile.favourites);
+      setLists(result.profile.lists);
     });
     setLoading(false);
   }, [baseUrl, user]);
@@ -129,53 +132,53 @@ export default function Profile() {
 
 
             <div className="flex flex-col gap-6">
-            <div className={`border border-[#252525] rounded-lg p-4 ${theme === "light" ? "bg-light-gray border-light-gray text-black" : "bg-[#151515]/50 text-white"}`}>
-              <h3 className="font-bold mb-3">Stats</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Games Played:</span>
-                  <span>127</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Reviews:</span>
-                  <span>42</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Lists:</span>
-                  <span>8</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Followers:</span>
-                  <span>156</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Following:</span>
-                  <span>89</span>
+              <div className={`border border-[#252525] rounded-lg p-4 ${theme === "light" ? "bg-light-gray border-light-gray text-black" : "bg-[#151515]/50 text-white"}`}>
+                <h3 className="font-bold mb-3">Stats</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Games Played:</span>
+                    <span>127</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Reviews:</span>
+                    <span>42</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Lists:</span>
+                    <span>8</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Followers:</span>
+                    <span>156</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Following:</span>
+                    <span>89</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
-              <h3 className="font-bold mb-3">Favorite Genres</h3>
-              <div className="flex flex-wrap gap-2">
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
-                  RPG
-                </div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
-                  Strategy
-                </div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
-                  Adventure
-                </div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
-                  Simulation
-                </div>
-                <div className="bg-[#252525] text-xs px-2 py-1 rounded">
-                  Indie
+              <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
+                <h3 className="font-bold mb-3">Favorite Genres</h3>
+                <div className="flex flex-wrap gap-2">
+                  <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                    RPG
+                  </div>
+                  <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                    Strategy
+                  </div>
+                  <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                    Adventure
+                  </div>
+                  <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                    Simulation
+                  </div>
+                  <div className="bg-[#252525] text-xs px-2 py-1 rounded">
+                    Indie
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           </div>
 
           {/* Main Content */}
@@ -184,41 +187,36 @@ export default function Profile() {
               <div className="bg-[#151515] border border-[#252525] p-1 rounded-md flex">
                 <button
                   onClick={() => setActiveTab("games")}
-                  className={`tab-button ${
-                    activeTab === "games" ? "active" : ""
-                  }`}
+                  className={`tab-button ${activeTab === "games" ? "active" : ""
+                    }`}
                 >
                   Games
                 </button>
                 <button
                   onClick={() => setActiveTab("reviews")}
-                  className={`tab-button ${
-                    activeTab === "reviews" ? "active" : ""
-                  }`}
+                  className={`tab-button ${activeTab === "reviews" ? "active" : ""
+                    }`}
                 >
                   Reviews
                 </button>
                 <button
                   onClick={() => setActiveTab("lists")}
-                  className={`tab-button ${
-                    activeTab === "lists" ? "active" : ""
-                  }`}
+                  className={`tab-button ${activeTab === "lists" ? "active" : ""
+                    }`}
                 >
                   Lists
                 </button>
                 <button
                   onClick={() => setActiveTab("diary")}
-                  className={`tab-button ${
-                    activeTab === "diary" ? "active" : ""
-                  }`}
+                  className={`tab-button ${activeTab === "diary" ? "active" : ""
+                    }`}
                 >
                   Diary
                 </button>
-                <button onClick={()=> setActiveTab("favourite")}
-                  className={`tab-button ${
-                    activeTab === "favourite" ? "active" : ""
-                  }`}>Favourites
-                  </button>
+                <button onClick={() => setActiveTab("favourite")}
+                  className={`tab-button ${activeTab === "favourite" ? "active" : ""
+                    }`}>Favourites
+                </button>
               </div>
             </div>
 
@@ -260,6 +258,37 @@ export default function Profile() {
                 </div>
 
                 <button className="btn btn-outline w-full">Load more</button>
+              </div>
+            )}
+            {activeTab === "lists" && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold">Lists</h2>
+                </div>
+
+                {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {lists?.length === 0 && (
+                    <div className="col-span-full text-center text-gray-500">
+                      No games found.
+                    </div>
+                  )}
+                  {lists?.map((items) => (
+                    <ListCard key={items.list._id} {...items.list} />
+                  ))}
+                </div> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {lists?.length === 0 && (
+                    <div className="col-span-full text-center text-gray-500">
+                      No games found.
+                    </div>
+                  )}
+                  {lists?.map((items) => (
+                    <ListCard key={items.list._id} {...items.list} />
+                  ))}
+                </div>
+
+
+                {/* <button className="btn btn-outline w-full">Load more</button> */}
               </div>
             )}
 
