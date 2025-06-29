@@ -6,6 +6,9 @@ const listSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    coverImage: {
+      type: String,
+    },
     tags: {
       type: [String],
     },

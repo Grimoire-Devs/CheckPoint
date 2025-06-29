@@ -2,7 +2,9 @@ const Profile = require("../models/profile");
 const User = require("../models/user");
 const List = require("../models/list");
 
-const handleGetList = async function (req, res) {
+const { uploadImage } = require("../utils/uploader");
+
+const handleGetListById = async function (req, res) {
   const user = req.user;
   const listId = req.params.id;
   const list = await List.findById(listId).populate([
@@ -12,23 +14,84 @@ const handleGetList = async function (req, res) {
   return res.status(200).json({ list: list });
 };
 
+const handleGetLists = async function (req, res) {
+  const list = await List.find().populate([
+    "createdBy",
+    "listItems.game",
+  ]).sort({ createdBy: -1 });
+  console.log(list);
+  return res.status(200).json({ list: list });
+};
+
+// const handleCreateList = async function (req, res) {
+//   const user = req.user;
+//   // console.log(req.body);
+//   const { title, tags, description, whoCanView } = req.body;
+//   const tagsArr = tags.split(',');
+
+
+//   try{const image = req.file;
+//   const imageUrl = await uploadImage(image.buffer, image.name || "image");
+
+//   let list = await List.create({
+//     title: title,
+//     tags: tagsArr,
+//     coverImage: imageUrl.secure_url,
+//     createdBy: user._id,
+//     description: description,
+//     whoCanView: whoCanView,
+//   });
+//   const lists = await List.find()
+//     .sort({ createdAt: -1 })
+//     .populate("createdBy");
+
+//   return res.status(200).json({ list: lists });}
+//   catch(err){
+//     console.log(err);
+//     return res.status(500).json({message: "Some Error Occurred."});
+//   }
+//   finally{
+//     const userProfile = await Profile.findOne({user: user._id});
+//     userProfile.lists.push(list._id);
+//     await Profile.save();
+//   }
+// }
 const handleCreateList = async function (req, res) {
   const user = req.user;
-  const listDetails = req.body.listDetails;
-  console.log(listDetails);
-  const list = await List.create({
-    title: listDetails.title,
-    tags: listDetails.tags.map((tag) => tag.toLowerCase()),
-    createdBy: user._id,
-    listItems: [],
-    whoCanView: listDetails.whoCanView,
-    description: listDetails.description,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  });
-  await list.populate("createdBy");
-  return res.status(201).json({ list: list });
+  const { title, tags, description, whoCanView } = req.body;
+  const tagsArr = tags.split(',');
+
+  try {
+    const image = req.file;
+    let imageUrl;
+    if(image)
+      imageUrl = await uploadImage(image.buffer, image.name || "image");
+
+    const list = await List.create({
+      title,
+      tags: tagsArr,
+      coverImage: imageUrl?.secure_url,
+      createdBy: user._id,
+      description,
+      whoCanView,
+    });
+
+    // Update user's profile to add this list
+    const userProfile = await Profile.findOne({ user: user._id });
+    if (userProfile) {
+      userProfile.lists.push({list: list._id});
+      await userProfile.save();
+    }
+
+    await list.populate("createdBy");
+
+    return res.status(200).json({ list: list });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Some Error Occurred." });
+  }
 };
+
 
 const handleUpdateList = async function (req, res) {
   const user = req.user;
@@ -77,9 +140,8 @@ const handleAddToList = async function (req, res) {
   const user = req.user;
   const listId = req.params.id;
   const list = await List.findById(listId);
-  console.log(list);
-  console.log(list.listItems);
-  const games = req.body.games;
+  const games = req.body.gameIds;
+  console.log(games);
   games.forEach((game) => {
     const gameId = game.toString();
 
@@ -99,15 +161,17 @@ const handleAddToList = async function (req, res) {
   list.updatedAt = Date.now();
   await list.save();
   await list.populate(["createdBy", "listItems.game"]);
+  console.log(list);
   return res.status(200).json({ list: list });
 };
 
 const handleRemoveFromList = async function (req, res) {
   const user = req.user;
   const listId = req.params.id;
+  console.log(listId);
   try {
     const list = await List.findById(listId);
-    const game = req.body.games;
+    const game = req.body.game;
     list.listItems.pull(
       list.listItems.find((item) => item.game._id.toString() == game.toString())
     );
@@ -116,12 +180,14 @@ const handleRemoveFromList = async function (req, res) {
     await list.populate(["createdBy", "listItems.game"]);
     return res.status(200).json({ list: list });
   } catch (err) {
+    console.log(err)
     return res.status(400).json({ error: "List Not Found" });
   }
 };
 
 module.exports = {
-  handleGetList,
+  handleGetLists,
+  handleGetListById,
   handleCreateList,
   handleUpdateList,
   handleDeleteList,
