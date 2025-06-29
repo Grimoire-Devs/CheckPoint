@@ -19,7 +19,7 @@ const handleGetLists = async function (req, res) {
     "createdBy",
     "listItems.game",
   ]).sort({ createdBy: -1 });
-  console.log(list);
+  // console.log(list);
   return res.status(200).json({ list: list });
 };
 
