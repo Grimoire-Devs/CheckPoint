@@ -1,10 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { ArrowLeft, Edit3, Plus, Share2, Heart, Eye, Users, Lock, Calendar, User, Hash, X, Search, Trash } from "lucide-react"
-import { MainNav } from "../components/MainNav"
-import { GameCard } from "../components/GameCard"
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Edit3,
+  Plus,
+  Share2,
+  Heart,
+  Eye,
+  Users,
+  Lock,
+  Calendar,
+  User,
+  Hash,
+  X,
+  Search,
+  Trash,
+} from "lucide-react";
+import { MainNav } from "../components/MainNav";
+import { GameCard } from "../components/GameCard";
 
 export default function ListDetails() {
   const { id } = useParams();
@@ -35,41 +50,46 @@ export default function ListDetails() {
     coverImage: null,
   });
 
+  const updateList = async () => {
+    const response = await fetch(`${baseUrl}/list/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ listDetails: editForm }),
+    });
+    const data = await response.json();
+    console.log(data);
+  };
 
-    const updateList = async () => {
+  const handleDeleteList = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this list? This action cannot be undone."
+    );
+    if (!confirmed) return;
+    const response = await fetch(`${baseUrl}/list/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    const data = await response.json();
+    console.log(data);
+    navigate("/lists");
+  };
+
+  // Fetch list details
+  useEffect(() => {
+    const fetchListDetails = async () => {
+      try {
+        setLoading(true);
         const response = await fetch(`${baseUrl}/list/${id}`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ listDetails: editForm })
-        })
+          credentials: "include",
+        });
+        if (response.status === 401) {
+          window.location.href = "/sign-in";
+          return;
+        }
         const data = await response.json();
-        console.log(data);
-    }
-
-    const handleDeleteList = async () => {
-        const confirmed = window.confirm("Are you sure you want to delete this list? This action cannot be undone.");
-        if (!confirmed) return;
-        const response = await fetch(`${baseUrl}/list/${id}`, {
-            method: "DELETE",
-            credentials: "include"
-        })
-        const data = await response.json();
-        console.log(data);
-        navigate("/lists");
-    }
-
-    // Fetch list details
-    useEffect(() => {
-        const fetchListDetails = async () => {
-            try {
-                setLoading(true)
-                const response = await fetch(`${baseUrl}/list/${id}`, {
-                    credentials: "include",
-                })
-                const data = await response.json()
 
         if (response.ok) {
           setList(data.list);
@@ -253,19 +273,19 @@ export default function ListDetails() {
     }
   }, [availableGames, searchedGames, searchQuery]);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-black text-white">
-                <MainNav />
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                        <p className="text-gray-400">Loading list details...</p>
-                    </div>
-                </div>
-            </div>
-        )
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <MainNav />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading list details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!list) {
     return (
@@ -286,9 +306,9 @@ export default function ListDetails() {
     );
   }
 
-    return (
-        <div className="min-h-screen bg-black text-white pb-6">
-            <MainNav />
+  return (
+    <div className="min-h-screen bg-black text-white pb-6">
+      <MainNav />
 
       {/* Hero Section */}
       <div className="relative">
@@ -387,53 +407,57 @@ export default function ListDetails() {
                   </div>
                 )}
 
-                                {/* Action Buttons */}
-                                <div className="flex flex-wrap gap-3">
-                                    {isOwner && (
-                                        <>
-                                            <button
-                                                onClick={() => setShowEditModal(true)}
-                                                className="btn btn-outline flex items-center gap-2"
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                                Edit List
-                                            </button>
-                                            <button
-                                                onClick={handleDeleteList}
-                                                className="btn btn-outline flex items-center gap-2"
-                                            >
-                                                <Trash className="w-4 h-4" />
-                                                Delete List
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setShowAddGamesModal(true)
-                                                    fetchAvailableGames()
-                                                }}
-                                                className="btn btn-neon flex items-center gap-2"
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                                Add Games
-                                            </button>
-                                        </>
-                                    )}
-                                    <button className="btn btn-outline flex items-center gap-2">
-                                        <Share2 className="w-4 h-4" />
-                                        Share
-                                    </button>
-                                    <button
-                                        className={`btn btn-outline flex items-center gap-2 ${isLiked ? "text-red-500 border-red-500" : ""}`}
-                                        onClick={() => setIsLiked(!isLiked)}
-                                    >
-                                        <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                                        {isLiked ? "Liked" : "Like"}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3">
+                  {isOwner && (
+                    <>
+                      <button
+                        onClick={() => setShowEditModal(true)}
+                        className="btn btn-outline flex items-center gap-2"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                        Edit List
+                      </button>
+                      <button
+                        onClick={handleDeleteList}
+                        className="btn btn-outline flex items-center gap-2"
+                      >
+                        <Trash className="w-4 h-4" />
+                        Delete List
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowAddGamesModal(true);
+                          fetchAvailableGames();
+                        }}
+                        className="btn btn-neon flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Games
+                      </button>
+                    </>
+                  )}
+                  <button className="btn btn-outline flex items-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                  <button
+                    className={`btn btn-outline flex items-center gap-2 ${
+                      isLiked ? "text-red-500 border-red-500" : ""
+                    }`}
+                    onClick={() => setIsLiked(!isLiked)}
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+                    />
+                    {isLiked ? "Liked" : "Like"}
+                  </button>
                 </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
 
       {/* Games Grid */}
       <div className="container py-12">
@@ -593,18 +617,26 @@ export default function ListDetails() {
                 />
               </div>
 
-                            <div className="flex gap-3">
-                                <button type="submit" onClick={updateList} className="btn btn-neon flex-1">
-                                    Save Changes
-                                </button>
-                                <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-outline">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  onClick={updateList}
+                  className="btn btn-neon flex-1"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="btn btn-outline"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Games Modal */}
       {showAddGamesModal && (
