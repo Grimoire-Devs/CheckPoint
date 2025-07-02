@@ -23,39 +23,6 @@ const handleGetLists = async function (req, res) {
   return res.status(200).json({ list: list });
 };
 
-// const handleCreateList = async function (req, res) {
-//   const user = req.user;
-//   // console.log(req.body);
-//   const { title, tags, description, whoCanView } = req.body;
-//   const tagsArr = tags.split(',');
-
-
-//   try{const image = req.file;
-//   const imageUrl = await uploadImage(image.buffer, image.name || "image");
-
-//   let list = await List.create({
-//     title: title,
-//     tags: tagsArr,
-//     coverImage: imageUrl.secure_url,
-//     createdBy: user._id,
-//     description: description,
-//     whoCanView: whoCanView,
-//   });
-//   const lists = await List.find()
-//     .sort({ createdAt: -1 })
-//     .populate("createdBy");
-
-//   return res.status(200).json({ list: lists });}
-//   catch(err){
-//     console.log(err);
-//     return res.status(500).json({message: "Some Error Occurred."});
-//   }
-//   finally{
-//     const userProfile = await Profile.findOne({user: user._id});
-//     userProfile.lists.push(list._id);
-//     await Profile.save();
-//   }
-// }
 const handleCreateList = async function (req, res) {
   const user = req.user;
   const { title, tags, description, whoCanView } = req.body;
@@ -84,8 +51,9 @@ const handleCreateList = async function (req, res) {
     }
 
     await list.populate("createdBy");
-
-    return res.status(200).json({ list: list });
+    const lists = await List.find().populate([
+      "createdBy","listItems"]);
+    return res.status(200).json({ lists: lists });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Some Error Occurred." });

@@ -1,183 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import ListCard from "../components/ListCard";
-// import { MainNav } from "../components/MainNav";
-
-// export default function List() {
-//     const baseUrl = import.meta.env.VITE_BASE_URL;
-
-//     const [lists, setLists] = useState([]);
-
-//     const [fields, setFields] = useState({
-//         title: "",
-//         tags: "",
-//         createdBy: "",
-//         description: "",
-//         whoCanView: "public",
-//     });
-
-//     // Show/hide the input fields
-//     const [showInputs, setShowInputs] = useState(false);
-
-//     // Handle input changes
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setFields((prev) => ({
-//             ...prev,
-//             [name]: value,
-//         }));
-//     };
-
-//     const handleSubmit = async () => {
-//         const response = await fetch(`${baseUrl}/list/create`, {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({
-//                 title: fields.title,
-//                 tags: fields.tags,
-//                 description: fields.description,
-//                 whoCanView: fields.whoCanView,
-//             }),
-//             credentials: "include",
-//         })
-//         const data = await response.json();
-//         console.log(data);
-//         setLists((prev) => [
-//             {
-//                 id: data._id,
-//                 title: data.title,
-//                 tags: data.tags,
-//                 createdBy: data.createdBy,
-//                 description: data.description,
-//                 whoCanView: data.whoCanView,
-//             },
-//             ...prev,
-//         ]);
-//         return;
-//     }
-
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             const response = await fetch(`${baseUrl}/list/`, {
-//                 method: "GET"
-//             });
-//             const data = await response.json();
-//             console.log(data);
-//             if (!response.ok)
-//                 return;
-//             setLists(data.list);
-//         }
-//         fetchData();
-//     }, []);
-
-//     return (
-//         <>
-//             <MainNav />
-//             <div className="min-h-screen bg-gradient-to-br from-[#2b1b4b] to-[#181028] py-12 px-4">
-//                 {/* Create List Button */}
-//                 <div className="flex justify-center mb-8">
-//                     <button
-//                         className="px-8 py-3 rounded-lg font-bold text-white bg-[#7000FF] hover:bg-[#A885FF] shadow-lg transition"
-//                         onClick={() => setShowInputs((v) => !v)}
-//                     >
-//                         {showInputs ? "Cancel" : "Create List"}
-//                     </button>
-//                 </div>
-
-//                 {/* Input fields shown only when Create List is clicked */}
-//                 {showInputs && (
-//                     <div className="max-w-2xl mx-auto bg-[#221a39] rounded-2xl p-8 mb-10 shadow-xl border-2 border-[#7000FF]/60">
-//                         <h2 className="text-2xl font-bold text-[#A885FF] mb-4">Add New List</h2>
-//                         <div className="space-y-5">
-//                             <div>
-//                                 <label className="block text-[#ded6f3] mb-1">
-//                                     Title <span className="text-[#7000FF]">*</span>
-//                                 </label>
-//                                 <input
-//                                     name="title"
-//                                     value={fields.title}
-//                                     onChange={handleChange}
-//                                     className="w-full bg-[#181028] text-white border border-[#7000FF] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A885FF] transition"
-//                                     placeholder="List Title"
-//                                     required
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <label className="block text-[#ded6f3] mb-1">Tags (comma separated)</label>
-//                                 <input
-//                                     name="tags"
-//                                     value={fields.tags}
-//                                     onChange={handleChange}
-//                                     className="w-full bg-[#181028] text-white border border-[#7000FF] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A885FF] transition"
-//                                     placeholder="action, adventure, rpg"
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <label className="block text-[#ded6f3] mb-1">
-//                                     Created By <span className="text-[#7000FF]">*</span>
-//                                 </label>
-//                                 <input
-//                                     name="createdBy"
-//                                     value={fields.createdBy}
-//                                     onChange={handleChange}
-//                                     className="w-full bg-[#181028] text-white border border-[#7000FF] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A885FF] transition"
-//                                     placeholder="Your Name"
-//                                     required
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <label className="block text-[#ded6f3] mb-1">
-//                                     Description <span className="text-[#7000FF]">*</span>
-//                                 </label>
-//                                 <textarea
-//                                     name="description"
-//                                     value={fields.description}
-//                                     onChange={handleChange}
-//                                     className="w-full bg-[#181028] text-white border border-[#7000FF] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A885FF] transition"
-//                                     placeholder="Describe your list"
-//                                     rows={3}
-//                                     required
-//                                 />
-//                             </div>
-//                             <div>
-//                                 <label className="block text-[#ded6f3] mb-1">Who Can See</label>
-//                                 <select
-//                                     name="whoCanView"
-//                                     value={fields.whoCanView}
-//                                     onChange={handleChange}
-//                                     className="w-full bg-[#181028] text-white border border-[#7000FF] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#A885FF] transition"
-//                                 >
-//                                     <option value="public">Public</option>
-//                                     <option value="private">Private</option>
-//                                     <option value="friends">Friends</option>
-//                                 </select>
-//                             </div>
-//                             <button
-//                                 onClick={handleSubmit}
-//                                 className="w-full py-3 rounded-lg font-bold text-white bg-[#7000FF] hover:bg-[#A885FF] shadow-lg transition text-lg"
-//                             >
-//                                 Add List
-//                             </button>
-//                         </div>
-//                     </div>
-//                 )}
-
-//                 {/* Lists Display */}
-//                 <div className="max-w-4xl mx-auto space-y-8">
-//                     {lists && lists.length === 0 ? (
-//                         <div className="text-center text-[#A885FF]">No lists yet. Be the first to add one!</div>
-//                     ) : (
-//                         lists?.map((list) => (
-//                             <ListCard {...list} key={list?._id} />
-//                         ))
-//                     )}
-//                 </div>
-//             </div>
-//         </>
-//     );
-// }
-
-// "use client"
-
 import React , { useState, useEffect } from "react"
 import { X, ImageIcon, Plus, Eye, Users, Lock } from "lucide-react"
 import { MainNav } from "../components/MainNav"
@@ -185,6 +5,7 @@ import ListCard from "../components/ListCard"
 
 export default function List() {
   const baseUrl = import.meta.env.VITE_BASE_URL
+  const [isCreating, setIsCreating] = useState(false);
   const [lists, setLists] = useState([])
   const [fields, setFields] = useState({
     title: "",
@@ -270,6 +91,7 @@ export default function List() {
   }
 
   const handleSubmit = async () => {
+    setIsCreating(true);
     const formData = new FormData()
     formData.append("title", fields.title)
     formData.append("tags", fields.tags)
@@ -286,21 +108,9 @@ export default function List() {
     })
 
     const data = await response.json()
-    console.log(data)
-
-    setLists((prev) => [
-      {
-        id: data._id,
-        title: data.title,
-        tags: data.tags,
-        createdBy: data.createdBy,
-        description: data.description,
-        whoCanView: data.whoCanView,
-        coverImage: data.coverImage,
-      },
-      ...prev,
-    ])
-
+    console.log(data);
+    setLists(data.lists);
+    setIsCreating(false);
     resetForm()
   }
 
@@ -315,7 +125,7 @@ export default function List() {
       setLists(data.list)
     }
     fetchData()
-  }, [])
+  }, [baseUrl,lists]);
 
   const getVisibilityIcon = (visibility) => {
     switch (visibility) {
@@ -480,10 +290,10 @@ export default function List() {
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={handleSubmit}
-                  disabled={!fields.title || !fields.description || !fields.createdBy}
+                  disabled={!fields.title || !fields.description || !fields.createdBy || isCreating}
                   className="flex-1 py-3 px-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 disabled:transform-none"
                 >
-                  Create List
+                  {isCreating ? "Creating..." : "Create List"}
                 </button>
                 <button
                   onClick={resetForm}
