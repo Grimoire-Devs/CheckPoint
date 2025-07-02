@@ -1,4 +1,4 @@
-import React , { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { X, ImageIcon, Plus, Eye, Users, Lock } from "lucide-react"
 import { MainNav } from "../components/MainNav"
 import ListCard from "../components/ListCard"
@@ -109,7 +109,7 @@ export default function List() {
 
     const data = await response.json()
     console.log(data);
-    setLists(data.lists);
+    setLists([...lists, data.list]);
     setIsCreating(false);
     resetForm()
   }
@@ -125,7 +125,7 @@ export default function List() {
       setLists(data.list)
     }
     fetchData()
-  }, [baseUrl,lists]);
+  }, [baseUrl]);
 
   const getVisibilityIcon = (visibility) => {
     switch (visibility) {
@@ -177,9 +177,8 @@ export default function List() {
 
                   {!imagePreview ? (
                     <div
-                      className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                        dragActive ? "border-purple-500 bg-purple-500/10" : "border-gray-600 hover:border-gray-500"
-                      }`}
+                      className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${dragActive ? "border-purple-500 bg-purple-500/10" : "border-gray-600 hover:border-gray-500"
+                        }`}
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
