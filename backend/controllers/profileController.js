@@ -40,7 +40,9 @@ const handleCreateProfile = async function (userId) {
 
 const handleUpdateFavs = async function (req, res) {
   const user = req.user;
+  console.log(req.body);
   const favs = req.body.favs;
+  // console.log(favs);
 
   if (!user) {
     return res
@@ -51,19 +53,27 @@ const handleUpdateFavs = async function (req, res) {
   try {
     const update = {};
     for (const fav of favs) {
-      const key = `favourites.${fav.id}`
+      const key = `favourites.${fav.id}`;
+      if (fav == null || fav?.game == null || fav?.game == undefined) {
+        update[key] = {
+        game: null,
+        addedAt: Date.now(),
+      };
+        continue; // Skip if fav or fav.game is null or undefined
+      }
 
       const alreadyExists = Object.values(userProfile.favourites).some(
-        (f) => String(f.game?._id || f.game) === String(fav.gameId)
+        (f) =>
+          f && f.game && String(f.game?._id || f.game) === String(fav.game._id)
       );
       const alreadyExistsKey = Object.keys(update).find(
-        (k) => k.game === fav.gameId
+        (k) => k.game === fav.game._id
       );
 
-      if (alreadyExists || alreadyExistsKey ) continue;
+      if (alreadyExists || alreadyExistsKey) continue;
 
       update[key] = {
-        game: fav.gameId,
+        game: fav.game._id,
         addedAt: Date.now(),
       };
     }
