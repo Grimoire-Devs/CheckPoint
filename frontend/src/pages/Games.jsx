@@ -1,55 +1,69 @@
-import React from "react"
-import { useLocation } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { MainNav } from "../components/MainNav"
-import { GameCard } from "../components/GameCard"
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { MainNav } from "../components/MainNav";
+import { GameCard } from "../components/GameCard";
+import SortDialogBox from "../components/SortDialogBox";
+import FilterDialogBox from "../components/FilterDialogBox";
 
 export default function Games() {
   const location = useLocation();
   const tab = location.state?.activeTab || "popular";
   const [activeTab, setActiveTab] = useState(tab);
-  const [games, setGames] = useState([])
+  const [games, setGames] = useState([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(18);
   const [totalPages, setTotalPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
+  // Sort dialog state
+  const [showSort, setShowSort] = useState(false);
+  const [sortBy, setSortBy] = useState("released");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const handleSort = (field, order) => {
+    setSortBy(field);
+    setSortOrder(order);
+    setShowSort(false);
+    // Optionally refetch or sort games here
+  };
+
+  // Filter dialog state
+  const [showFilter, setShowFilter] = useState(false);
+
   const handleIncrement = () => {
     if (page < totalPages) {
       setPage(page + 1);
     }
-  }
+  };
   const handleDecrement = () => {
     if (page > 1) {
       setPage(page - 1);
     }
-  }
+  };
 
   useEffect(() => {
     async function fetchGames() {
-      setLoading(true)
+      setLoading(true);
       let endpoint = `/games/${activeTab}`;
-
       try {
-        const res = await fetch(baseUrl + endpoint + `?page=${page}&limit=${limit}`);
+        const res = await fetch(
+          baseUrl + endpoint + `?page=${page}&limit=${limit}`
+        );
         const data = await res.json();
-        // console.log(data);
         setTotalPage(data.totalPages);
         setGames(data.games || []);
       } catch (err) {
         console.log(err);
-        setGames([])
+        setGames([]);
       }
-      setLoading(false)
+      setLoading(false);
     }
-    fetchGames()
+    fetchGames();
   }, [activeTab, baseUrl, page, limit]);
 
   return (
     <div className="min-h-screen bg-black text-white">
       <MainNav />
-
       <div className="container py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
@@ -57,35 +71,11 @@ export default function Games() {
             <span className="badge mb-2">DISCOVER</span>
             <h1 className="text-3xl font-bold text-white">Games Library</h1>
           </div>
-
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {/* <div className="relative w-full md:w-auto flex-1">
-              <input
-                type="search"
-                placeholder="Search games..."
-                className="input w-full md:w-[300px] !pr-10"
-              />
-              <button
-                onClick={() => navigate('/profile')}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </button>
-            </div> */}
-            <button className="btn btn-outline btn-icon">
+            <button
+              className="btn btn-outline btn-icon"
+              onClick={() => setShowSort(true)}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -99,9 +89,12 @@ export default function Games() {
               >
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
-              <span className="sr-only">Filter</span>
+              <span className="sr-only">Sort</span>
             </button>
-            <button className="btn btn-outline hidden md:flex items-center gap-2">
+            <button
+              className="btn btn-outline hidden md:flex items-center gap-2"
+              onClick={() => setShowFilter(true)}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -128,6 +121,34 @@ export default function Games() {
           </div>
         </div>
 
+        {/* Sort Dialog */}
+        {showSort && (
+          <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowSort(false)}
+          >
+            <div className="z-50" onClick={(e) => e.stopPropagation()}>
+              <SortDialogBox
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                handleSort={handleSort}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Filter Dialog */}
+        {showFilter && (
+          <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowFilter(false)}
+          >
+            <div className="z-50" onClick={(e) => e.stopPropagation()}>
+              <FilterDialogBox onClose={() => setShowFilter(false)} />
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="mb-8">
           <div className="bg-[#151515] border border-[#252525] p-1 rounded-md flex">
@@ -136,13 +157,15 @@ export default function Games() {
                 setActiveTab("popular");
                 setPage(1);
               }}
-              className={`tab-button ${activeTab === "popular" ? "active" : ""}`}
+              className={`tab-button ${
+                activeTab === "popular" ? "active" : ""
+              }`}
             >
               Popular
             </button>
             <button
               onClick={() => {
-                setActiveTab("latest")
+                setActiveTab("latest");
                 setPage(1);
               }}
               className={`tab-button ${activeTab === "latest" ? "active" : ""}`}
@@ -151,21 +174,23 @@ export default function Games() {
             </button>
             <button
               onClick={() => {
-                setActiveTab("upcoming")
-                setPage(1)
-              }
-              }
-              className={`tab-button ${activeTab === "upcoming" ? "active" : ""}`}
+                setActiveTab("upcoming");
+                setPage(1);
+              }}
+              className={`tab-button ${
+                activeTab === "upcoming" ? "active" : ""
+              }`}
             >
               Upcoming
             </button>
             <button
               onClick={() => {
-                setActiveTab("top-rated")
-                setPage(1)
-              }
-              }
-              className={`tab-button ${activeTab === "top-rated" ? "active" : ""}`}
+                setActiveTab("top-rated");
+                setPage(1);
+              }}
+              className={`tab-button ${
+                activeTab === "top-rated" ? "active" : ""
+              }`}
             >
               Top Rated
             </button>
@@ -189,26 +214,26 @@ export default function Games() {
           <button
             disabled={page === 1}
             onClick={handleDecrement}
-            className={`btn btn-neon px-6 py-2 w-28 ${page === 1 ? "!bg-purple-600 !cursor-not-allowed !opacity-60" : ""
-              }`}
+            className={`btn btn-neon px-6 py-2 w-28 ${
+              page === 1 ? "!bg-purple-600 !cursor-not-allowed !opacity-60" : ""
+            }`}
           >
             Previous
           </button>
-          <button className="btn btn-neon px-6 py-2 w-12">
-            {page}
-          </button>
+          <button className="btn btn-neon px-6 py-2 w-12">{page}</button>
           <button
             disabled={page === totalPages}
             onClick={handleIncrement}
-            className={`btn btn-neon px-6 py-2 w-28 ${page === totalPages ? "!bg-purple-600 !cursor-not-allowed !opacity-60" : ""
-              }`}
+            className={`btn btn-neon px-6 py-2 w-28 ${
+              page === totalPages
+                ? "!bg-purple-600 !cursor-not-allowed !opacity-60"
+                : ""
+            }`}
           >
             Next
           </button>
-
         </div>
-
       </div>
     </div>
-  )
+  );
 }
