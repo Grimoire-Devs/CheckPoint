@@ -15,10 +15,9 @@ const handleGetListById = async function (req, res) {
 };
 
 const handleGetLists = async function (req, res) {
-  const list = await List.find().populate([
-    "createdBy",
-    "listItems.game",
-  ]).sort({ createdBy: -1 });
+  const list = await List.find()
+    .populate(["createdBy", "listItems.game"])
+    .sort({ createdBy: -1 });
   // console.log(list);
   return res.status(200).json({ list: list });
 };
@@ -26,12 +25,12 @@ const handleGetLists = async function (req, res) {
 const handleCreateList = async function (req, res) {
   const user = req.user;
   const { title, tags, description, whoCanView } = req.body;
-  const tagsArr = tags.split(',');
+  const tagsArr = tags.split(",");
 
   try {
     const image = req.file;
     let imageUrl;
-    if(image)
+    if (image)
       imageUrl = await uploadImage(image.buffer, image.name || "image");
 
     const list = await List.create({
@@ -44,22 +43,19 @@ const handleCreateList = async function (req, res) {
     });
 
     // Update user's profile to add this list
-    const userProfile = await Profile.findOne({ user: user._id });
-    if (userProfile) {
-      userProfile.lists.push({list: list._id});
-      await userProfile.save();
-    }
+    await Profile.updateOne(
+      { user: user._id },
+      { $push: { lists: { list: list._id } } }
+    );
 
     await list.populate("createdBy");
-    const lists = await List.find().populate([
-      "createdBy","listItems"]);
-    return res.status(200).json({ lists: lists });
+    const lists = await List.find().populate(["createdBy", "listItems"]);
+    return res.status(200).json({ list: list });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Some Error Occurred." });
   }
 };
-
 
 const handleUpdateList = async function (req, res) {
   const user = req.user;
@@ -148,7 +144,7 @@ const handleRemoveFromList = async function (req, res) {
     await list.populate(["createdBy", "listItems.game"]);
     return res.status(200).json({ list: list });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(400).json({ error: "List Not Found" });
   }
 };
