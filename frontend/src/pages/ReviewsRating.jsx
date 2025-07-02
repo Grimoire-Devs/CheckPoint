@@ -28,6 +28,10 @@ export default function ReviewsRating() {
           reviewText: reviewRef.current.value,
         }),
       });
+      if (res.status === 401) {
+        window.location.href = "/sign-in";
+        return;
+      }
       const data = await res.json();
       if (!res.ok || data.error) {
         setError(data.error || "Failed to submit review.");

@@ -54,6 +54,10 @@ export default function Profile() {
         method: "GET",
         credentials: "include",
       });
+      if (response.status === 401) {
+        window.location.href = "/sign-in";
+        return;
+      }
       const data = await response.json();
       console.log(data);
       return data;
@@ -68,7 +72,11 @@ export default function Profile() {
   }, [baseUrl, user]);
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
+    <div
+      className={`min-h-screen ${
+        theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+      }`}
+    >
       <MainNav />
       <div className="container py-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -130,9 +138,14 @@ export default function Profile() {
               </div>
             </div>
 
-
             <div className="flex flex-col gap-6">
-              <div className={`border border-[#252525] rounded-lg p-4 ${theme === "light" ? "bg-light-gray border-light-gray text-black" : "bg-[#151515]/50 text-white"}`}>
+              <div
+                className={`border border-[#252525] rounded-lg p-4 ${
+                  theme === "light"
+                    ? "bg-light-gray border-light-gray text-black"
+                    : "bg-[#151515]/50 text-white"
+                }`}
+              >
                 <h3 className="font-bold mb-3">Stats</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -187,35 +200,43 @@ export default function Profile() {
               <div className="bg-[#151515] border border-[#252525] p-1 rounded-md flex">
                 <button
                   onClick={() => setActiveTab("games")}
-                  className={`tab-button ${activeTab === "games" ? "active" : ""
-                    }`}
+                  className={`tab-button ${
+                    activeTab === "games" ? "active" : ""
+                  }`}
                 >
                   Games
                 </button>
                 <button
                   onClick={() => setActiveTab("reviews")}
-                  className={`tab-button ${activeTab === "reviews" ? "active" : ""
-                    }`}
+                  className={`tab-button ${
+                    activeTab === "reviews" ? "active" : ""
+                  }`}
                 >
                   Reviews
                 </button>
                 <button
                   onClick={() => setActiveTab("lists")}
-                  className={`tab-button ${activeTab === "lists" ? "active" : ""
-                    }`}
+                  className={`tab-button ${
+                    activeTab === "lists" ? "active" : ""
+                  }`}
                 >
                   Lists
                 </button>
                 <button
                   onClick={() => setActiveTab("diary")}
-                  className={`tab-button ${activeTab === "diary" ? "active" : ""
-                    }`}
+                  className={`tab-button ${
+                    activeTab === "diary" ? "active" : ""
+                  }`}
                 >
                   Diary
                 </button>
-                <button onClick={() => setActiveTab("favourite")}
-                  className={`tab-button ${activeTab === "favourite" ? "active" : ""
-                    }`}>Favourites
+                <button
+                  onClick={() => setActiveTab("favourite")}
+                  className={`tab-button ${
+                    activeTab === "favourite" ? "active" : ""
+                  }`}
+                >
+                  Favourites
                 </button>
               </div>
             </div>
@@ -286,7 +307,6 @@ export default function Profile() {
                     <ListCard key={items.list._id} {...items.list} />
                   ))}
                 </div>
-
 
                 {/* <button className="btn btn-outline w-full">Load more</button> */}
               </div>

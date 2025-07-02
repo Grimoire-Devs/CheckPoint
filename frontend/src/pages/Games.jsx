@@ -41,13 +41,61 @@ export default function Games() {
     }
   };
 
+  // Get filter and sort values from sessionStorage
+  const getFilterAndSortParams = () => {
+    let params = {};
+    // Sort
+    const sortBySession = window.sessionStorage.getItem("sortBy");
+    const sortOrderSession = window.sessionStorage.getItem("sortOrder");
+    params.sortBy = sortBySession || sortBy;
+    params.sortOrder = sortOrderSession || sortOrder;
+    // Filters
+    const filtersSession = window.sessionStorage.getItem("filters");
+    if (filtersSession) {
+      const filters = JSON.parse(filtersSession);
+      if (filters.genres && filters.genres.length > 0)
+        params.genres = filters.genres.join(",");
+      if (filters.platforms && filters.platforms.length > 0)
+        params.platforms = filters.platforms.join(",");
+      if (filters.developers && filters.developers.length > 0)
+        params.developers = filters.developers.join(",");
+      if (filters.publishers && filters.publishers.length > 0)
+        params.publishers = filters.publishers.join(",");
+      if (filters.yearRange) {
+        params.yearMin = filters.yearRange[0];
+        params.yearMax = filters.yearRange[1];
+      }
+      if (filters.ratingRange) {
+        params.ratingMin = filters.ratingRange[0];
+        params.ratingMax = filters.ratingRange[1];
+      }
+      if (filters.userStatus) {
+        Object.entries(filters.userStatus).forEach(([key, val]) => {
+          if (val) params[`userStatus_${key}`] = true;
+        });
+      }
+    }
+    return params;
+  };
+
+  // Local trigger for filter/sort changes (since sessionStorage event doesn't fire in same tab)
+  const [updateFlag, setUpdateFlag] = useState(false);
+  const triggerUpdate = () => setUpdateFlag((f) => !f);
+
   useEffect(() => {
     async function fetchGames() {
       setLoading(true);
       let endpoint = `/games/${activeTab}`;
+      const params = getFilterAndSortParams();
+      const queryString = Object.entries(params)
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
       try {
         const res = await fetch(
-          baseUrl + endpoint + `?page=${page}&limit=${limit}`
+          baseUrl +
+            endpoint +
+            `?page=${page}&limit=${limit}` +
+            (queryString ? `&${queryString}` : "")
         );
         const data = await res.json();
         setTotalPage(data.totalPages);
@@ -59,7 +107,19 @@ export default function Games() {
       setLoading(false);
     }
     fetchGames();
-  }, [activeTab, baseUrl, page, limit]);
+  }, [activeTab, baseUrl, page, limit, sortBy, sortOrder, updateFlag]);
+
+  // Listen for changes in sessionStorage for sort/filter and trigger fetch
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'filters' || e.key === 'sortBy' || e.key === 'sortOrder') {
+        setPage(1); // Optionally reset to first page on filter/sort change
+        setUpdateFlag((f) => !f); // trigger fetch
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -131,7 +191,7 @@ export default function Games() {
               <SortDialogBox
                 sortBy={sortBy}
                 sortOrder={sortOrder}
-                handleSort={handleSort}
+                handleSort={(field, order) => { handleSort(field, order); triggerUpdate(); }}
               />
             </div>
           </div>
@@ -144,7 +204,7 @@ export default function Games() {
             onClick={() => setShowFilter(false)}
           >
             <div className="z-50" onClick={(e) => e.stopPropagation()}>
-              <FilterDialogBox onClose={() => setShowFilter(false)} />
+              <FilterDialogBox onClose={() => { setShowFilter(false); triggerUpdate(); }} triggerUpdate={triggerUpdate} />
             </div>
           </div>
         )}
