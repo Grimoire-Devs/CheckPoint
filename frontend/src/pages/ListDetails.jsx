@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { ArrowLeft, Edit3, Plus, Share2, Heart, Eye, Users, Lock, Calendar, User, Hash, X, Search } from "lucide-react"
+import { ArrowLeft, Edit3, Plus, Share2, Heart, Eye, Users, Lock, Calendar, User, Hash, X, Search, Trash } from "lucide-react"
 import { MainNav } from "../components/MainNav"
 import { GameCard } from "../components/GameCard"
 
@@ -34,6 +34,32 @@ export default function ListDetails() {
         whoCanView: "public",
         coverImage: null,
     })
+
+
+    const updateList = async () => {
+        const response = await fetch(`${baseUrl}/list/${id}`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ listDetails: editForm })
+        })
+        const data = await response.json();
+        console.log(data);
+    }
+
+    const handleDeleteList = async () => {
+        const confirmed = window.confirm("Are you sure you want to delete this list? This action cannot be undone.");
+        if (!confirmed) return;
+        const response = await fetch(`${baseUrl}/list/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        })
+        const data = await response.json();
+        console.log(data);
+        navigate("/lists");
+    }
 
     // Fetch list details
     useEffect(() => {
@@ -228,7 +254,7 @@ export default function ListDetails() {
 
 
 
-    if (loading) { 
+    if (loading) {
         return (
             <div className="min-h-screen bg-black text-white">
                 <MainNav />
@@ -260,7 +286,7 @@ export default function ListDetails() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-black text-white pb-6">
             <MainNav />
 
             {/* Hero Section */}
@@ -355,6 +381,13 @@ export default function ListDetails() {
                                             >
                                                 <Edit3 className="w-4 h-4" />
                                                 Edit List
+                                            </button>
+                                            <button
+                                                onClick={handleDeleteList}
+                                                className="btn btn-outline flex items-center gap-2"
+                                            >
+                                                <Trash className="w-4 h-4" />
+                                                Delete List
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -522,7 +555,7 @@ export default function ListDetails() {
                             </div>
 
                             <div className="flex gap-3">
-                                <button type="submit" className="btn btn-neon flex-1">
+                                <button type="submit" onClick={updateList} className="btn btn-neon flex-1">
                                     Save Changes
                                 </button>
                                 <button type="button" onClick={() => setShowEditModal(false)} className="btn btn-outline">
