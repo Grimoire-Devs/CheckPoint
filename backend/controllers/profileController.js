@@ -40,57 +40,29 @@ const handleCreateProfile = async function (userId) {
 
 const handleUpdateFavs = async function (req, res) {
   const user = req.user;
-  console.log(req.body);
   const favs = req.body.favs;
-  // console.log(favs);
 
   if (!user) {
     return res
       .status(400)
       .json({ status: 400, message: "Login Again to Continue..." });
   }
-  const userProfile = await Profile.findOne({ user: user._id });
-  try {
-    const update = {};
-    for (const fav of favs) {
-      const key = `favourites.${fav.id}`;
-      if (fav == null || fav?.game == null || fav?.game == undefined) {
-        update[key] = {
-        game: null,
-        addedAt: Date.now(),
-      };
-        continue; // Skip if fav or fav.game is null or undefined
-      }
 
-      const alreadyExists = Object.values(userProfile.favourites).some(
-        (f) =>
-          f && f.game && String(f.game?._id || f.game) === String(fav.game._id)
-      );
-      const alreadyExistsKey = Object.keys(update).find(
-        (k) => k.game === fav.game._id
-      );
+  // Build the new favourites array in the correct order
+  const newFavourites = favs.map((fav) => ({
+    game: fav.game ? fav.game._id || fav.game : null,
+    addedAt: Date.now(),
+  }));
 
-      if (alreadyExists || alreadyExistsKey) continue;
+  await Profile.updateOne(
+    { user: user._id },
+    { $set: { favourites: newFavourites } }
+  );
 
-      update[key] = {
-        game: fav.game._id,
-        addedAt: Date.now(),
-      };
-    }
-
-    await Profile.updateOne({ user: user._id }, { $set: update });
-
-    const updatedProfile = await Profile.findOne({ user: user._id }).populate(
-      "favourites.game"
-    );
-
-    return res.status(201).json({
-      message: "Updated Favourites",
-      Profile: updatedProfile,
-    });
-  } catch (e) {
-    return res.json({ error: `Error occurred ${e}` });
-  }
+  const updatedProfile = await Profile.findOne({ user: user._id }).populate(
+    "favourites.game"
+  );
+  res.status(200).json({ status: 200, Profile: updatedProfile });
 };
 
 const handleDeleteFav = async function (req, res) {
