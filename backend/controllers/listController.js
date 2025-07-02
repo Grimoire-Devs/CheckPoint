@@ -93,8 +93,8 @@ const handleDeleteList = async function (req, res) {
   await List.findByIdAndDelete(listId);
   //   console.log("deleted");
   await Profile.updateMany(
-    { "lists._id": listId },
-    { $pull: { lists: { _id: listId } } }
+    { "lists.list": listId },
+    { $pull: { lists: { list: listId } } }
   );
 
   return res.status(200).json({ message: "List Deleted Successfully" });

@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { GameCard } from "../components/GameCard";
 import { ThemeContext } from "../ThemeContext";
 import ListCard from "../components/ListCard";
+import FavoritesSection from "../components/FavouritesSection";
 
 export default function Profile() {
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -16,7 +17,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [favourites, setFavourites] = useState(null);
+  const [favouritesGames, setFavouritesGames] = useState(null);
   const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function Profile() {
     fetchData().then((result) => {
       // console.log(result.profile);
       setProfile(result.profile);
-      setFavourites(result.profile.favourites);
+      setFavouritesGames(result.profile.favourites);
       setLists(result.profile.lists);
     });
     setLoading(false);
@@ -318,18 +319,18 @@ export default function Profile() {
                   <h2 className="text-xl font-bold">Favourites</h2>
                 </div>
 
-                <div className="grid md:grid-cols-4  gap-4">
-                  {favourites.length === 0 && (
-                    <div className="col-span-full text-center text-gray-500">
-                      No games found.
-                    </div>
-                  )}
-                  {favourites.map((fav) => (
-                    <GameCard key={fav?.game?._id} game={fav?.game} />
-                  ))}
-                </div>
+                {Array.isArray(favouritesGames) ? (
+                  <FavoritesSection
+                    initialFavorites={favouritesGames}
+                    onUpdateFavorites={setFavouritesGames}
+                    availableGames={games}
+                  />
+                ) : (
+                  <p className="text-gray-500">Loading favourites...</p>
+                )}
               </div>
             )}
+
 
             {activeTab === "reviews" && (
               <div className="space-y-6">
