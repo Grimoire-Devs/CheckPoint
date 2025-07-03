@@ -16,18 +16,18 @@ const logGame = async (req, res) => {
       tags: tags,
       game: gameId,
     });
-
+    
     await Game.findOneAndUpdate(gameId, {
       $push: { reviews: review._id },
     });
+    await review.populate(["game", "createdBy"]);
 
     await Profile.findOneAndUpdate(
       { user: user._id },
       {
-        $push: { reviews: review._id },
+        $push: { reviews: { review: review._id, createdAt: review.createdAt } },
       }
     );
-
     res.json({ message: "game logged successfully" + review });
   } catch (err) {
     res.json({ error: err.message });
@@ -41,6 +41,7 @@ const getGameReview = async (req, res) => {
     if (!review) {
       throw error;
     }
+    await review.populate(["game", "createdBy"]);
     res.json({ review: review });
   } catch (err) {
     res.json({ error: err.message });
@@ -65,9 +66,9 @@ const deleteGameReview = async (req, res) => {
     });
 
     await Profile.findOneAndUpdate(
-      { user: userId },
+      { user: user._id },
       {
-        $pull: { reviews: reviewId },
+        $pull: { reviews: { review: review._id, createdAt: review.createdAt } },
       }
     );
     res.json({ message: "Review Deleted!!" });

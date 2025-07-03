@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react"
 import { X, ImageIcon, Plus, Eye, Users, Lock } from "lucide-react"
+import { useLocation } from "react-router-dom"
 import { MainNav } from "../components/MainNav"
 import ListCard from "../components/ListCard"
 
 export default function List() {
+  const location = useLocation();
   const baseUrl = import.meta.env.VITE_BASE_URL
   const [isCreating, setIsCreating] = useState(false);
   const [lists, setLists] = useState([])
@@ -17,7 +19,8 @@ export default function List() {
   })
 
   // Show/hide the input fields
-  const [showInputs, setShowInputs] = useState(false)
+  const showInputsValue = location.state?.showInputs || false;
+  const [showInputs, setShowInputs] = useState(showInputsValue)
   const [imagePreview, setImagePreview] = useState(null)
   const [dragActive, setDragActive] = useState(false)
 

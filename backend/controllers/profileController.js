@@ -1,5 +1,19 @@
 const Profile = require("../models/profile");
 
+const POPULATE_PATHS = [
+  "user",
+  "favourites.game",
+  "lists.list",
+  "wishlist.game",
+  {
+    path: "reviews.review",
+    populate: [
+      { path: "game", model: "game" },
+      { path: "createdBy", model: "user" }
+    ]
+  }
+];
+
 const handleGetProfile = async function (req, res) {
   const user = req.user;
   if (!user) {
@@ -9,13 +23,12 @@ const handleGetProfile = async function (req, res) {
   }
   try {
     const userProfile = await Profile.findOne({ user: user._id });
-    await userProfile.populate([
-      "user",
-      "favourites.game",
-      "reviews.review",
-      "lists.list",
-      "wishlist.game",
-    ]);
+    if (!userProfile) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Profile not found" });
+    }
+    await userProfile.populate(POPULATE_PATHS);
     return res.status(200).json({ profile: userProfile });
   } catch (e) {
     return res.status(500).json({ error: `Error occurred ${e}` });
@@ -24,18 +37,13 @@ const handleGetProfile = async function (req, res) {
 
 const handleCreateProfile = async function (userId) {
   let userProfile = await Profile.findOne({ user: userId });
-  //   console.log(userProfile);
   if (userProfile != null) {
     return;
   } else {
-    userProfile = await Profile.create({
-      user: userId,
-    });
+    userProfile = await Profile.create({ user: userId });
     await userProfile.populate("user");
     return;
-    // console.log(userProfile);
   }
-  return;
 };
 
 const handleUpdateFavs = async function (req, res) {
@@ -59,9 +67,8 @@ const handleUpdateFavs = async function (req, res) {
     { $set: { favourites: newFavourites } }
   );
 
-  const updatedProfile = await Profile.findOne({ user: user._id }).populate(
-    "favourites.game"
-  );
+  const updatedProfile = await Profile.findOne({ user: user._id });
+  await updatedProfile.populate(POPULATE_PATHS);
   res.status(200).json({ status: 200, Profile: updatedProfile });
 };
 
@@ -78,9 +85,8 @@ const handleDeleteFav = async function (req, res) {
     { [`favourites.${fav.id}`]: { $exists: true } },
     { $unset: { [`favourites.${fav.id}`]: {} } }
   );
-  const userProfile = await Profile.findOne({ user: user._id }).populate(
-    "favourites.game"
-  );
+  const userProfile = await Profile.findOne({ user: user._id });
+  await userProfile.populate(POPULATE_PATHS);
   return res.status(201).json({ message: "deleted", Profile: userProfile });
 };
 
