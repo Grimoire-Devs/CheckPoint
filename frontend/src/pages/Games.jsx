@@ -204,7 +204,7 @@ export default function Games() {
             onClick={() => setShowFilter(false)}
           >
             <div className="z-50" onClick={(e) => e.stopPropagation()}>
-              <FilterDialogBox onClose={() => { setShowFilter(false); triggerUpdate(); }} triggerUpdate={triggerUpdate} />
+              <FilterDialogBox onClose={() => { setShowFilter(false); triggerUpdate(); }} />
             </div>
           </div>
         )}

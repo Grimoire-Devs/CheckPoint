@@ -48,7 +48,7 @@ const defaultFilters = {
   },
 };
 
-export default function FilterDialogBox({ onClose }) {
+export default function FilterDialogBox({ onClose, triggerUpdate }) {
   const [filters, setFilters] = useState(() => {
     const saved = window.sessionStorage.getItem("filters");
     return saved ? JSON.parse(saved) : defaultFilters;
@@ -76,6 +76,11 @@ export default function FilterDialogBox({ onClose }) {
   const clearFilters = () => {
     setFilters(defaultFilters);
     window.sessionStorage.setItem("filters", JSON.stringify(defaultFilters));
+  };
+
+  const handleApply = () => {
+    window.sessionStorage.setItem("filters", JSON.stringify(filters));
+    onClose(); // Parent will handle triggerUpdate
   };
 
   return (
@@ -311,6 +316,12 @@ export default function FilterDialogBox({ onClose }) {
           onClick={clearFilters}
         >
           Clear All
+        </button>
+        <button
+          className="px-4 py-2 rounded border border-purple-600 text-purple-300 hover:bg-purple-800"
+          onClick={handleApply}
+        >
+          Apply
         </button>
       </div>
     </div>
