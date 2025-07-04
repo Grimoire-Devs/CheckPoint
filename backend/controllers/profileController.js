@@ -1,5 +1,8 @@
 const Profile = require("../models/profile");
 
+const { uploadImage } = require("../utils/uploader");
+const User = require("../models/user");
+
 const POPULATE_PATHS = [
   "user",
   "favourites.game",
@@ -9,9 +12,9 @@ const POPULATE_PATHS = [
     path: "reviews.review",
     populate: [
       { path: "game", model: "game" },
-      { path: "createdBy", model: "user" }
-    ]
-  }
+      { path: "createdBy", model: "user" },
+    ],
+  },
 ];
 
 const handleGetProfile = async function (req, res) {
@@ -29,8 +32,15 @@ const handleGetProfile = async function (req, res) {
         .json({ status: 404, message: "Profile not found" });
     }
     await userProfile.populate(POPULATE_PATHS);
+    userProfile.reviews.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    userProfile.wishlist.sort(
+      (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
+    );
     return res.status(200).json({ profile: userProfile });
   } catch (e) {
+    console.log(e);
     return res.status(500).json({ error: `Error occurred ${e}` });
   }
 };
@@ -90,9 +100,70 @@ const handleDeleteFav = async function (req, res) {
   return res.status(201).json({ message: "deleted", Profile: userProfile });
 };
 
+const handleUpdateProfile = async function (req, res) {
+  const user = req.user;
+  console.log(req.body);
+  console.log(req.file);
+  const { name, userName, description } = req.body;
+  const profileImage = req.file || req.body.profileImage;
+  let imageUrl;
+  if (profileImage)
+    imageUrl = await uploadImage(
+      profileImage.buffer,
+      profileImage.name || "image"
+    );
+  const userData = await User.findById(user._id);
+  const profile = await Profile.findOne({ user: user._id });
+  const existingUsername = await User.findOne({ userName: userName });
+  if (
+    existingUsername &&
+    existingUsername._id.toString() !== user._id.toString()
+  ) {
+    return res.status(400).json({ message: "Username already exists" });
+  }
+  if (!user) {
+    return res
+      .status(400)
+      .json({ status: 400, message: "Login Again to Continue..." });
+  }
+  if (!profile) {
+    return res.status(404).json({ message: "Profile not found" });
+  }
+  if (!userData) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        name,
+        userName,
+        profileImage: imageUrl?.secure_url,
+      },
+    }
+  );
+  await Profile.updateOne(
+    { user: user._id },
+    { $set: { description: description } }
+  );
+  const updatedProfile = await Profile.findOne({ user: user._id });
+  await updatedProfile.populate(POPULATE_PATHS);
+  return res.status(200).json({
+    message: "Profile updated successfully",
+    profile: updatedProfile,
+    user: {
+      name: userData.name,
+      userName: userData.userName,
+      email: userData.email,
+      profileImage: userData.profileImage,
+    },
+  });
+};
+
 module.exports = {
   handleGetProfile,
   handleCreateProfile,
   handleUpdateFavs,
   handleDeleteFav,
+  handleUpdateProfile,
 };

@@ -3,8 +3,21 @@ const router = express.Router();
 const { signup, signin } = require("../controllers/authController");
 const { logout } = require("../controllers/authController");
 const verifyUser = require("../middlewares/auth");
-const {forgotPassword, resetPassword} = require("../controllers/authController");   
-const { followUser, unfollowUser, getFollowers, getFollowing } = require("../controllers/userController");
+const {
+  forgotPassword,
+  resetPassword,
+} = require("../controllers/authController");
+const {
+  followUser,
+  unfollowUser,
+  getFollowers,
+  getFollowing,
+  handleGetFavoriteGenre,
+} = require("../controllers/userController");
+const {
+  handleGetLists,
+  handleGetReviews,
+} = require("../controllers/userController");
 router.post("/signup", signup);
 
 router.post("/signin", signin);
@@ -24,7 +37,10 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/follow/:id", verifyUser, followUser);
 router.post("/unfollow/:id", verifyUser, unfollowUser);
-router.get("/followers/:id", verifyUser,getFollowers);
+router.get("/followers/:id", verifyUser, getFollowers);
 router.get("/following/:id", verifyUser, getFollowing);
+router.get("/lists/:id", verifyUser, handleGetLists);
+router.get("/reviews/:id", verifyUser, handleGetReviews);
+router.get("/favGenres/:id", verifyUser, handleGetFavoriteGenre);
 
 module.exports = router;

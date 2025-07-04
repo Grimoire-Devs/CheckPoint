@@ -48,14 +48,49 @@ export default function Profile() {
   const [following, setFollowing] = useState([])
   const [wishlist, setWishlist] = useState([])
   const [reviews, setReviews] = useState([])
+  const [editError, setEditError] = useState("");
   const [editFormData, setEditFormData] = useState({
-    name: "",
-    userName: "",
-    email: "",
-    description: "",
-    location: "",
-    website: "",
-  })
+    name: user?.name || "",
+    userName: user?.userName || "",
+    description: profile?.description || "",
+    email: user?.email || "",
+    profileImage: user?.profileImage || null, // <-- add this
+  });
+  const currentUser = JSON.parse(localStorage.getItem('user'))?._id;
+
+  const [favouriteGenre, setFavouriteGenre] = useState([]);
+  useEffect(() => {
+    const fetchFavGenre = async () => {
+      const response = await fetch(`${baseUrl}/favGenres/${user?._id}`, {
+        credentials: "include"
+      });
+      console.log(response.status);
+
+      if (response.status == 200) {
+        const data = await response.json();
+        console.log(data);
+        setFavouriteGenre(data.favGenres);
+      } else {
+        setFavouriteGenre([]);
+      }
+    }
+    if (user != null || user != undefined)
+      fetchFavGenre();
+  }, [user, baseUrl]);
+
+  useEffect(() => {
+    if (user && profile) {
+      setEditFormData({
+        name: user.name || "",
+        userName: user.userName || "",
+        description: profile.description || "",
+        email: user.email || "",
+        profileImage: user.profileImage || null,
+      });
+    }
+  }, [user, profile]);
+
+
   const { theme } = useContext(ThemeContext)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchedGames, setSearchedGames] = useState([])
@@ -136,10 +171,31 @@ export default function Profile() {
   }
 
   const handleSaveProfile = async () => {
-    // Add your API call to update profile here
-    console.log("Saving profile:", editFormData)
-    setIsEditModalOpen(false)
-  }
+    const formData = new FormData();
+    formData.append("name", editFormData.name);
+    formData.append("userName", editFormData.userName);
+    formData.append("description", editFormData.description);
+    // formData.append("email", editFormData.email);
+    if (editFormData.profileImage instanceof File) {
+      formData.append("profileImage", editFormData.profileImage);
+    }
+
+    const response = await fetch(`${baseUrl}/profile/`, {
+      method: "PATCH",
+      credentials: "include",
+      body: formData,
+    });
+    const data = await response.json();
+    console.log(data);
+    if (response.ok) {
+      setProfile(data.profile);
+      setUser(data.profile.user);
+    } else {
+      setEditError(data.message);
+    }
+    setIsEditModalOpen(false);
+
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -166,8 +222,8 @@ export default function Profile() {
     gamesPlayed: games.length || 0,
     reviews: reviews?.length || 0,
     lists: profile?.lists?.length || 8,
-    followers: profile?.followers?.length || 156,
-    following: profile?.followings?.length || 89,
+    followers: profile?.followers?.length || 0,
+    following: profile?.followings?.length || 0,
     favourites: profile?.favourites?.length || 4,
     wishlist: wishlist?.length || 0,
   }
@@ -187,14 +243,13 @@ export default function Profile() {
               <div className="relative group">
                 <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-purple-500/20 shadow-xl">
                   <img
-                    src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
-                    alt="User"
+                    src={
+                      editFormData.profileImage || "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
+                    }
+                    alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <button className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  <Camera className="w-8 h-8 text-white" />
-                </button>
               </div>
 
               <div className="text-center sm:text-left">
@@ -215,16 +270,6 @@ export default function Profile() {
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-500">Joined {user && dayjs(user.createdAt).format("MMM YYYY")}</span>
                   </div>
-                  {/* <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-500">New York, USA</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-gray-500" />
-                    <a href="#" className="text-purple-500 hover:text-purple-600">
-                      portfolio.com
-                    </a>
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -254,7 +299,7 @@ export default function Profile() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              {user?._id == currentUser && <div className="flex gap-3">
                 <button
                   onClick={handleEditProfile}
                   className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${theme === "dark"
@@ -281,7 +326,7 @@ export default function Profile() {
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
-              </div>
+              </div>}
             </div>
           </div>
         </div>
@@ -331,7 +376,7 @@ export default function Profile() {
             >
               <h3 className="font-bold mb-4 text-lg">Favorite Genres</h3>
               <div className="flex flex-wrap gap-2">
-                {["RPG", "Strategy", "Adventure", "Simulation", "Indie", "Action"].map((genre) => (
+                {favouriteGenre.length > 0 && favouriteGenre?.map((genre) => (
                   <span
                     key={genre}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium ${theme === "dark"
@@ -342,6 +387,10 @@ export default function Profile() {
                     {genre}
                   </span>
                 ))}
+                {
+                  (favouriteGenre.length == 0 || favouriteGenre == undefined) &&
+                  <span>No Games Played.</span>
+                }
               </div>
             </div>
 
@@ -647,24 +696,60 @@ export default function Profile() {
             </div>
 
             <div className="space-y-6">
-              {/* Profile Photo Section */}
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-300">
                     <img
-                      src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
+                      src={
+                        editFormData.profileImage instanceof File
+                          ? URL.createObjectURL(editFormData.profileImage)
+                          : editFormData.profileImage || "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
+                      }
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <button className="absolute -bottom-1 -right-1 bg-purple-500 text-white p-1.5 rounded-full hover:bg-purple-600">
+                  <label className="absolute -bottom-1 -right-1 bg-purple-500 text-white p-1.5 rounded-full hover:bg-purple-600 cursor-pointer">
                     <Upload className="w-3 h-3" />
-                  </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          setEditFormData(prev => ({
+                            ...prev,
+                            profileImage: e.target.files[0]
+                          }));
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
                 <div>
                   <h3 className="font-semibold">Profile Photo</h3>
                   <p className="text-sm text-gray-500">Upload a new profile picture</p>
-                  <button className="text-purple-500 text-sm hover:text-purple-600 mt-1">Change Photo</button>
+                  <button
+                    className="text-purple-500 text-sm hover:text-purple-600 mt-1"
+                    type="button"
+                    onClick={() => {
+                      // Trigger file input click
+                      document.querySelector('input[type="file"][accept^="image"]').click();
+                    }}
+                  >
+                    Change Photo
+                  </button>
+                  {editFormData.profileImage && (
+                    <button
+                      className="ml-2 text-xs text-red-500 hover:underline"
+                      type="button"
+                      onClick={() =>
+                        setEditFormData(prev => ({ ...prev, profileImage: null }))
+                      }
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -696,7 +781,7 @@ export default function Profile() {
                     type="email"
                     name="email"
                     value={editFormData.email}
-                    onChange={handleInputChange}
+                    disabled
                     className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
                   />
                 </div>
@@ -707,11 +792,12 @@ export default function Profile() {
                     value={editFormData.description}
                     onChange={handleInputChange}
                     rows={3}
+                    maxlength="400"
                     className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
-                    placeholder="Tell us about yourself and your gaming interests..."
+                    placeholder="Tell us about yourself and your gaming interests...(Not more than 400 characters)"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium mb-2">Location</label>
                   <input
                     type="text"
@@ -721,8 +807,8 @@ export default function Profile() {
                     className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
                     placeholder="City, Country"
                   />
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <label className="block text-sm font-medium mb-2">Website</label>
                   <input
                     type="url"
@@ -732,7 +818,7 @@ export default function Profile() {
                     className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
                     placeholder="https://yourwebsite.com"
                   />
-                </div>
+                </div> */}
               </div>
 
               {/* Action Buttons */}
@@ -751,6 +837,10 @@ export default function Profile() {
                   Cancel
                 </button>
               </div>
+              {editError && <div className="text-red-500" >
+                {editError}
+              </div>
+              }
             </div>
           </div>
         </div>
