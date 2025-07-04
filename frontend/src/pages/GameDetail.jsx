@@ -1,10 +1,171 @@
 "use client";
 
-import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useEffect, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Star,
+  Edit3,
+  Clock,
+  Trophy,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  ThumbsUp,
+  Monitor,
+  Gamepad2,
+  Smartphone,
+  Plus,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+} from "lucide-react";
+
+// Sample/mock data for fallback
+const sampleGameData = {
+  _id: "67fb9ce69f74254e00519261",
+  id: 3498,
+  title: "Grand Theft Auto V",
+  released: "2013-09-17",
+  rating: 4.47,
+  coverImage: "https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg",
+  playTime: 74,
+  platforms: ["PC", "PlayStation 4", "Xbox One", "PlayStation 5"],
+  genre: ["Action", "Adventure", "Crime"],
+  description:
+    "<p>Rockstar Games went bigger, since their previous installment of the series. You get the complicated and realistic world to explore, filled with gangs and corruption from all sides. You play as three characters at once.</p><p>Michael, ex-criminal living his life of leisure in Los Santos, occasionally hanging out with his family, Franklin, a kid that seeks the better future, and Trevor, the exact past Michael is trying to escape from. Their stories intertwine, as Michael owes a lot of money to some really bad people.</p>",
+  metacritic: 92,
+  ratings_count: 7101,
+  website: "http://www.rockstargames.com/V/",
+  screenshots: [
+    {
+      id: 1,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Los Santos cityscape",
+      type: "image",
+    },
+    {
+      id: 2,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Character selection screen",
+      type: "image",
+    },
+    {
+      id: 3,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Gameplay trailer",
+      type: "video",
+    },
+    {
+      id: 4,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Mission gameplay",
+      type: "image",
+    },
+    {
+      id: 5,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Vehicle customization",
+      type: "image",
+    },
+    {
+      id: 6,
+      url: "/placeholder.svg?height=400&width=600",
+      caption: "Multiplayer mode",
+      type: "image",
+    },
+  ],
+  reviews: [
+    {
+      id: 1,
+      user: { name: "Alex Johnson", avatar: "/placeholder.svg?height=40&width=40" },
+      rating: 5,
+      text: "Absolutely incredible game! The open world is massive and there's always something to do. The story is engaging and the characters are well-developed.",
+      likes: 24,
+      tags: ["masterpiece", "open-world", "story"],
+      createdAt: "2024-01-15",
+    },
+    {
+      id: 2,
+      user: { name: "Sarah Chen", avatar: "/placeholder.svg?height=40&width=40" },
+      rating: 4,
+      text: "Great game with amazing graphics and gameplay. Some missions can be repetitive but overall a fantastic experience.",
+      likes: 18,
+      tags: ["graphics", "gameplay"],
+      createdAt: "2024-01-10",
+    },
+  ],
+  similarGames: [
+    {
+      id: 1,
+      title: "Red Dead Redemption 2",
+      coverImage: "/placeholder.svg?height=200&width=150",
+      rating: 4.6,
+      genre: ["Action", "Adventure"],
+    },
+    {
+      id: 2,
+      title: "Watch Dogs 2",
+      coverImage: "/placeholder.svg?height=200&width=150",
+      rating: 4.2,
+      genre: ["Action", "Hacking"],
+    },
+    {
+      id: 3,
+      title: "Cyberpunk 2077",
+      coverImage: "/placeholder.svg?height=200&width=150",
+      rating: 3.8,
+      genre: ["RPG", "Sci-Fi"],
+    },
+  ],
+};
+
+const ratingDistribution = [
+  { rating: 5, count: 3200, percentage: 45 },
+  { rating: 4, count: 2130, percentage: 30 },
+  { rating: 3, count: 1065, percentage: 15 },
+  { rating: 2, count: 426, percentage: 6 },
+  { rating: 1, count: 280, percentage: 4 },
+];
+
+const platformPrices = {
+  PC: { price: "₹1,499", platform: "Steam" },
+  "PlayStation 4": { price: "₹1,999", platform: "PS Store" },
+  "Xbox One": { price: "₹1,799", platform: "Xbox Store" },
+  "PlayStation 5": { price: "₹2,499", platform: "PS Store" },
+};
+
+const GameDetailSkeleton = () => (
+  <div className="min-h-screen bg-slate-900">
+    <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="flex flex-col lg:flex-row gap-8 items-start mb-12">
+        <div className="w-64 h-80 bg-slate-700/50 rounded-2xl animate-pulse" />
+        <div className="flex-1 space-y-4">
+          <div className="h-12 bg-slate-700/50 rounded-lg animate-pulse" />
+          <div className="h-6 bg-slate-700/50 rounded-lg animate-pulse w-32" />
+          <div className="h-8 bg-slate-700/50 rounded-lg animate-pulse w-64" />
+          <div className="flex gap-4">
+            <div className="h-12 bg-slate-700/50 rounded-xl animate-pulse w-32" />
+            <div className="h-12 bg-slate-700/50 rounded-xl animate-pulse w-40" />
+          </div>
+        </div>
+      </div>
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-slate-800/50 rounded-2xl p-6 mb-8">
+          <div className="h-8 bg-slate-700/50 rounded-lg animate-pulse w-48 mb-6" />
+          <div className="space-y-4">
+            <div className="h-4 bg-slate-700/50 rounded animate-pulse" />
+            <div className="h-4 bg-slate-700/50 rounded animate-pulse w-3/4" />
+            <div className="h-4 bg-slate-700/50 rounded animate-pulse w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default function GameDetail() {
   const aboutRef = useRef(null);
@@ -12,594 +173,696 @@ export default function GameDetail() {
   const listsRef = useRef(null);
   const statsRef = useRef(null);
   const baseUrl = import.meta.env.VITE_BASE_URL;
-
   const navigate = useNavigate();
   const { id } = useParams();
   const [game, setGame] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
+
+  // UI state for advanced UI
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [visibleReviews, setVisibleReviews] = useState(2);
+  const [currentScreenshot, setCurrentScreenshot] = useState(0);
 
   useEffect(() => {
+    let ignore = false;
     async function fetchData() {
       setLoading(true);
-
-      const gameRes = await fetch(`${baseUrl}/games/${id}`);
-      const gameData = await gameRes.json();
-      setGame(gameData.game);
-
-      const reviewRes = await fetch(`${baseUrl}/games/${id}/reviews`);
-      const reviewData = await reviewRes.json();
-      setReviews(reviewData.reviews);
+      setApiError(false);
+      try {
+        const gameRes = await fetch(`${baseUrl}/games/${id}`);
+        const gameData = await gameRes.json();
+        if (!ignore && gameData && gameData.game) {
+          setGame(gameData.game);
+        } else {
+          setGame(null);
+        }
+        // Fetch reviews
+        const reviewRes = await fetch(`${baseUrl}/games/${id}/reviews`);
+        const reviewData = await reviewRes.json();
+        if (!ignore && reviewData && reviewData.reviews) {
+          setReviews(reviewData.reviews);
+        } else {
+          setReviews([]);
+        }
+      } catch (e) {
+        setApiError(true);
+        setGame(null);
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
-  }, [id]);
+    return () => { ignore = true; };
+  }, [id, baseUrl]);
 
+  // Wishlist handler
   const handleWishlist = async () => {
-    await fetch(`${baseUrl}/wishlist/add`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gameId: id }),
-    });
+    setIsWishlisted((prev) => !prev);
+    try {
+      await fetch(`${baseUrl}/wishlist/add`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId: id }),
+      });
+    } catch (e) {}
   };
 
+  // Scroll helpers
   const scrollToSection = (ref) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <MainNav />
-
-      {/* Hero Banner */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 to-blue-900/20 z-10" />
-        <div className="relative h-[60vh] w-full overflow-hidden">
-          <img
-            src={game?.coverImage}
-            alt="Game banner"
-            className="object-cover w-full h-full"
+  // Helper functions for UI
+  const getPlatformIcon = (platform) => {
+    if (platform.includes("PC")) return <Monitor className="w-4 h-4" />;
+    if (platform.includes("PlayStation")) return <Gamepad2 className="w-4 h-4" />;
+    if (platform.includes("Xbox")) return <Gamepad2 className="w-4 h-4" />;
+    return <Smartphone className="w-4 h-4" />;
+  };
+  const formatDate = (dateString) => new Date(dateString).getFullYear();
+  const renderStars = (rating, size = "w-4 h-4") => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`${size} ${
+              i < fullStars
+                ? "fill-yellow-400 text-yellow-400"
+                : i === fullStars && hasHalfStar
+                  ? "fill-yellow-400/50 text-yellow-400"
+                  : "text-gray-600"
+            }`}
           />
+        ))}
+      </div>
+    );
+  };
+  const nextScreenshot = (screenshots) => {
+    setCurrentScreenshot((prev) => (prev + 1) % screenshots.length);
+  };
+  const prevScreenshot = (screenshots) => {
+    setCurrentScreenshot((prev) => (prev - 1 + screenshots.length) % screenshots.length);
+  };
+
+  // Use API data if available, otherwise fallback to sample data
+  const gameData = game
+    ? {
+        ...sampleGameData,
+        ...game,
+        reviews: reviews.length > 0 ? reviews : sampleGameData.reviews,
+      }
+    : { ...sampleGameData };
+
+  // Show skeleton while loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col">
+        <MainNav />
+        <div className="flex-1 flex items-center justify-center">
+          <GameDetailSkeleton />
         </div>
-        <div className="absolute bottom-0 left-0 right-0 z-20 container pb-12">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div
-              className="w-40 h-56 -mt-20 rounded-lg overflow-hidden shadow-xl border-4 border-black"
-              style={{ boxShadow: "0 0 20px rgba(168,85,247,0.5)" }}
-            >
+        <Footer />
+      </div>
+    );
+  }
+
+  // Main UI between header and footer
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <MainNav />
+      <div className="flex-1">
+        {/* --- Advanced UI Start --- */}
+        <div className="min-h-screen bg-slate-900">
+          {/* Hero Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden"
+          >
+            {/* Background Image with Blur */}
+            <div className="absolute inset-0 z-0">
               <img
-                src={game?.coverImage}
-                alt="Game cover"
-                className="object-cover w-full h-full"
+                src={gameData?.coverImage || "/placeholder.svg"}
+                alt=""
+                className="w-full h-full object-cover blur-3xl opacity-20 scale-110"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-slate-900/40" />
             </div>
-            <div className="text-white">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                {game?.title}
-                {/* <span className="text-gradient">Beyond Infinity</span> */}
-              </h1>
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                {game?.genre.map((g, i) => (
-                  <span className="badge" key={i}>
-                    {g}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-6 mt-4">
-                <div className="flex items-center gap-1.5">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="#FBBF24"
-                    stroke="#FBBF24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                  <span className="font-medium">{game?.rating}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-white/70">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect
-                      x="3"
-                      y="4"
-                      width="18"
-                      height="18"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
-                  <span>
-                    {game?.released
-                      ? typeof game.released === "string"
-                        ? game.released.slice(0, 4)
-                        : new Date(game.released).getFullYear()
-                      : ""}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-white/70">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="6" y1="11" x2="10" y2="11"></line>
-                    <line x1="8" y1="9" x2="8" y2="13"></line>
-                    <line x1="15" y1="12" x2="15.01" y2="12"></line>
-                    <line x1="18" y1="10" x2="18.01" y2="10"></line>
-                    <path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"></path>
-                  </svg>
-                  <span>CD Projekt Red</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="bg-black border-b border-[#252525]">
-        <div className="container py-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              className="btn btn-primary flex items-center gap-2"
-              onClick={() => window.open(game?.website, "_blank")}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              Play Now
-            </button>
-            <button className="btn btn-outline flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
-              Like
-            </button>
-            <button
-              className="btn btn-outline flex items-center gap-2"
-              onClick={handleWishlist}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-              </svg>
-              Wishlist
-            </button>
-            <button className="btn btn-outline flex items-center gap-2" onClick={() => navigate(`/reviews/${id}`)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              Played
-            </button>
-            <button className="btn btn-outline flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-              </svg>
-              Share
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Tabs - Hidden until hover */}
-      <div className="sticky top-16 z-30 bg-black/90 backdrop-blur-md border-b border-[#252525]">
-        <div className="container">
-          <div className="group relative h-1 bg-[#252525]">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#7000FF] to-[#6366f1] w-0 group-hover:w-full transition-all duration-300"></div>
-            <nav className="absolute left-0 right-0 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 py-3 flex gap-6">
-              <button
-                onClick={() => scrollToSection(aboutRef)}
-                className="text-sm font-medium text-white/70 hover:text-[#7000FF] transition-colors"
-              >
-                About
-              </button>
-              <button
-                onClick={() => scrollToSection(reviewsRef)}
-                className="text-sm font-medium text-white/70 hover:text-[#7000FF] transition-colors"
-              >
-                Reviews
-              </button>
-              <button
-                onClick={() => scrollToSection(listsRef)}
-                className="text-sm font-medium text-white/70 hover:text-[#7000FF] transition-colors"
-              >
-                Lists
-              </button>
-              <button
-                onClick={() => scrollToSection(statsRef)}
-                className="text-sm font-medium text-white/70 hover:text-[#7000FF] transition-colors"
-              >
-                Stats
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Game Stats */}
-          <div className="w-full lg:w-80 space-y-8">
-            <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
-              <h3 className="font-bold mb-3 text-white">Game Details</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-white/50">Developer:</span>
-                  <span className="text-white">CD Projekt Red</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50">Publisher:</span>
-                  <span className="text-white">CD Projekt</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50">Release Date:</span>
-                  <span className="text-white">{game?.released}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50">Platforms:</span>
-                  <span className="text-white">{game?.platforms?.join(", ")}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50">Genres:</span>
-                  <span className="text-white">{game?.genre?.join(", ")}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              ref={statsRef}
-              className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50"
-            >
-              <h3 className="font-bold mb-4 text-white">Game Stats</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="border border-[#252525] rounded-lg p-4 text-center bg-[#151515]/50">
-                  <div className="text-3xl font-bold text-white">
-                    {game?.rating}
-                  </div>
-                  <div className="text-sm text-white/50">Average Rating</div>
-                </div>
-                <div className="border border-[#252525] rounded-lg p-4 text-center bg-[#151515]/50">
-                  <div className="text-3xl font-bold text-white">1,245</div>
-                  <div className="text-sm text-white/50">Players</div>
-                </div>
-                <div className="border border-[#252525] rounded-lg p-4 text-center bg-[#151515]/50">
-                  <div className="text-3xl font-bold text-white">328</div>
-                  <div className="text-sm text-white/50">Reviews</div>
-                </div>
-              </div>
-
-              <h4 className="font-bold mt-6 mb-3 text-white">
-                Rating Distribution
-              </h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 text-sm text-right text-white/70">5★</div>
-                  <div className="flex-1 bg-[#252525] rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-[#7000FF] h-4 rounded-full"
-                      style={{ width: "70%" }}
-                    ></div>
-                  </div>
-                  <div className="w-8 text-sm text-white/70">70%</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 text-sm text-right text-white/70">4★</div>
-                  <div className="flex-1 bg-[#252525] rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-[#7000FF] h-4 rounded-full"
-                      style={{ width: "20%" }}
-                    ></div>
-                  </div>
-                  <div className="w-8 text-sm text-white/70">20%</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 text-sm text-right text-white/70">3★</div>
-                  <div className="flex-1 bg-[#252525] rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-[#7000FF] h-4 rounded-full"
-                      style={{ width: "5%" }}
-                    ></div>
-                  </div>
-                  <div className="w-8 text-sm text-white/70">5%</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 text-sm text-right text-white/70">2★</div>
-                  <div className="flex-1 bg-[#252525] rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-[#7000FF] h-4 rounded-full"
-                      style={{ width: "3%" }}
-                    ></div>
-                  </div>
-                  <div className="w-8 text-sm text-white/70">3%</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 text-sm text-right text-white/70">1★</div>
-                  <div className="flex-1 bg-[#252525] rounded-full h-4 overflow-hidden">
-                    <div
-                      className="bg-[#7000FF] h-4 rounded-full"
-                      style={{ width: "2%" }}
-                    ></div>
-                  </div>
-                  <div className="w-8 text-sm text-white/70">2%</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
-              <h3 className="font-bold mb-3 text-white">Similar Games</h3>
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Link to="#" key={i} className="flex gap-3 group">
-                    <div className="w-16 h-24 rounded overflow-hidden bg-[#252525]">
-                      <img
-                        src="/game-cover.jpeg"
-                        alt="Game cover"
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white group-hover:text-[#7000FF] transition-colors">
-                        Similar Game Title
-                      </h4>
-                      <p className="text-xs text-white/50">2023</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="#FBBF24"
-                          stroke="#FBBF24"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                        <span className="text-xs text-white/70">4.2</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="border border-[#252525] rounded-lg p-4 bg-[#151515]/50">
-              <h3 className="font-bold mb-3 text-white">Where to Play</h3>
-              <div className="space-y-3">
-                {game?.platforms.map((e) => (
-                  <button className="btn btn-primary w-full justify-between group">
-                    <span>{e}</span>
-                    <span className="text-white/70 group-hover:text-white">
-                      $59.99
-                    </span>
-                  </button>
-                ))}
-
-                {/* <button className="btn btn-outline w-full justify-between">
-                  <span>Epic Games Store</span>
-                  <span className="text-white/70">$59.99</span>
-                </button>
-                <button className="btn btn-outline w-full justify-between">
-                  <span>Xbox Store</span>
-                  <span className="text-white/70">$59.99</span>
-                </button>
-                <button className="btn btn-outline w-full justify-between">
-                  <span>PlayStation Store</span>
-                  <span className="text-white/70">$59.99</span>
-                </button> */}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Content Sections */}
-          <div className="flex-1 space-y-16">
-            {/* About Section */}
-            <div ref={aboutRef} id="about" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 rounded-full bg-[#7000FF] flex items-center justify-center mr-3 text-white">
-                  <span className="text-sm">01</span>
-                </span>
-                About
-              </h2>
-              <div
-                className="text-white/80 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: game?.description || "" }}
-              />
-            </div>
-
-            {/* Reviews Section */}
-            <div ref={reviewsRef} id="reviews" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <span className="w-8 h-8 rounded-full bg-[#7000FF] flex items-center justify-center mr-3 text-white">
-                  <span className="text-sm">02</span>
-                </span>
-                Reviews
-              </h2>
-
-              <div className="flex justify-between items-center mb-6">
-                <p className="text-white/70">328 reviews from the community</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => navigate(`/reviews/${id}`)}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+              <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Cover Image */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="flex-shrink-0"
                 >
-                  Write a Review
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                {reviews.length === 0 && (
-                  <div className="text-white/50">No reviews yet.</div>
-                )}
-                {reviews.map((r, idx) => (
-                  <div
-                    key={r._id || idx}
-                    className="border border-[#252525] rounded-lg p-5 hover:border-[#7000FF] transition-colors duration-300 bg-[#151515]/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border border-[#252525]">
-                        <img
-                          src={r.userAvatar || "/game-cover.jpeg"}
-                          alt="User"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-medium text-white">
-                          {r.createdBy?.userName || "Anonymous"}
-                        </div>
-                        <div className="text-sm text-white/50">
-                          {/* Optionally format date */}
-                          {r.createdAt
-                            ? `Posted ${new Date(
-                                r.createdAt
-                              ).toLocaleDateString()}`
-                            : ""}
-                        </div>
-                      </div>
-                      <div className="ml-auto flex items-center">
-                        <div className="rating">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg
-                              key={i}
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill={i < r.rating ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                          ))}
-                        </div>
-                        <span className="ml-2 text-sm font-medium text-white">
-                          {r.rating?.toFixed(1) ?? ""}
-                        </span>
-                      </div>
-                    </div>
-                    <h4 className="font-bold text-lg mt-4 text-white">
-                      {r.title || "Review"}
-                    </h4>
-                    <p className="text-white/70 mt-2">{r.reviewText}</p>
-                    <div className="flex items-center gap-4 text-sm text-white/50 mt-4">
-                      <button className="flex items-center gap-1 hover:text-[#7000FF] transition-colors">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                        </svg>
-                        <span>{r.likes || 0} Likes</span>
-                      </button>
-                      <button className="hover:text-[#7000FF] transition-colors">
-                        Reply
-                      </button>
-                    </div>
+                  <div className="relative group">
+                    <img
+                      src={gameData?.coverImage || "/placeholder.svg"}
+                      alt={gameData?.title}
+                      className="w-48 h-64 object-cover rounded-xl shadow-2xl group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                ))}
-
-                <button className="btn btn-outline w-full">
-                  Load more reviews
-                </button>
+                </motion.div>
+                {/* Game Info */}
+                <div className="flex-1 space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                  >
+                    <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                      {gameData?.title}
+                    </h1>
+                    <p className="text-xl text-gray-300">{formatDate(gameData?.released)}</p>
+                  </motion.div>
+                  {/* Stats */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="flex flex-wrap gap-6 text-gray-300"
+                  >
+                    <div className="flex items-center gap-2">
+                      {renderStars(gameData?.rating, "w-5 h-5")}
+                      <span className="font-semibold text-white">{gameData?.rating}</span>
+                      <span className="text-sm">({gameData?.ratings_count?.toLocaleString?.() || 0} ratings)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      <span className="font-semibold">{gameData?.metacritic}</span>
+                      <span className="text-sm">Metacritic</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-blue-400" />
+                      <span>{gameData?.playTime} hours</span>
+                    </div>
+                  </motion.div>
+                  {/* Platform Badges */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                    className="flex flex-wrap gap-2"
+                  >
+                    {gameData?.platforms?.map((platform, index) => (
+                      <span key={index} className="flex items-center gap-2 px-3 py-1 bg-slate-700/50 text-gray-300 rounded-full text-sm border border-slate-600/50">
+                        {getPlatformIcon(platform)}
+                        {platform}
+                      </span>
+                    ))}
+                  </motion.div>
+                  {/* Action Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    className="flex gap-4"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleWishlist}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        isWishlisted
+                          ? "bg-gradient-to-r from-pink-600 to-red-600 text-white"
+                          : "bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600/50"
+                      }`}
+                    >
+                      {isWishlisted ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => scrollToSection(reviewsRef)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-500 hover:to-pink-500 transition-all duration-200"
+                    >
+                      <Edit3 className="w-5 h-5" />
+                      Write a Review
+                    </motion.button>
+                  </motion.div>
+                </div>
               </div>
             </div>
+          </motion.section>
+
+          <div className="max-w-7xl mx-auto px-6 py-6 space-y-8">
+            {/* Compact Rating Distribution */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 shadow-xl"
+            >
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent"
+              >
+                Rating Distribution
+              </motion.h2>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Compact Bar Chart */}
+                <div className="space-y-3">
+                  {ratingDistribution.map((item, index) => (
+                    <motion.div
+                      key={item.rating}
+                      initial={{ opacity: 0, x: -50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 w-12">
+                          <motion.span className="text-white font-medium text-sm" whileHover={{ scale: 1.1 }}>
+                            {item.rating}
+                          </motion.span>
+                          <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          </motion.div>
+                        </div>
+                        <div className="flex-1 relative">
+                          <div className="bg-slate-700/50 rounded-full h-2 overflow-hidden border border-slate-600/30 group-hover:border-purple-500/50 transition-all duration-300">
+                            <motion.div
+                              initial={{ width: 0, opacity: 0.7 }}
+                              whileInView={{ width: `${item.percentage}%`, opacity: 1 }}
+                              transition={{
+                                duration: 1.2,
+                                delay: 0.3 + index * 0.1,
+                                ease: "easeOut",
+                              }}
+                              className={`h-full rounded-full relative overflow-hidden ${
+                                item.rating === 5
+                                  ? "bg-gradient-to-r from-green-500 to-green-400"
+                                  : item.rating === 4
+                                    ? "bg-gradient-to-r from-blue-500 to-blue-400"
+                                    : item.rating === 3
+                                      ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                      : item.rating === 2
+                                        ? "bg-gradient-to-r from-orange-500 to-orange-400"
+                                        : "bg-gradient-to-r from-red-600 to-red-500"
+                              }`}
+                            >
+                              {/* Animated shine effect */}
+                              <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                initial={{ x: "-100%" }}
+                                animate={{ x: "100%" }}
+                                transition={{
+                                  duration: 2,
+                                  delay: 1 + index * 0.2,
+                                  repeat: Number.POSITIVE_INFINITY,
+                                  repeatDelay: 3,
+                                }}
+                              />
+                            </motion.div>
+                          </div>
+                        </div>
+                        <motion.div
+                          className="text-right min-w-[60px]"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                        >
+                          <div className="text-white font-medium text-sm">{item.count.toLocaleString()}</div>
+                          <div className="text-purple-300 text-xs">{item.percentage}%</div>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Stats Summary */}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Total Reviews", value: game.ratings_count.toLocaleString(), icon: "📊" },
+                    { label: "Average Rating", value: game.rating, icon: "⭐" },
+                    {
+                      label: "Positive Reviews",
+                      value: `${Math.round(((ratingDistribution[0].count + ratingDistribution[1].count) / game.ratings_count) * 100)}%`,
+                      icon: "👍",
+                    },
+                    { label: "Metacritic Score", value: game.metacritic, icon: "🏆" },
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 10px 25px rgba(168, 85, 247, 0.2)",
+                      }}
+                      className="bg-slate-700/60 rounded-lg p-3 text-center border border-slate-600/50 hover:border-purple-500/50 transition-all duration-300"
+                    >
+                      <div className="text-lg mb-1">{stat.icon}</div>
+                      <div className="text-white font-bold text-sm">{stat.value}</div>
+                      <div className="text-gray-300 text-xs">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.section>
+
+            {/* Description */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                About This Game
+              </h2>
+              <div className="text-gray-300 leading-relaxed">
+                <div
+                  className={`${!showFullDescription ? "line-clamp-3" : ""}`}
+                  dangerouslySetInnerHTML={{ __html: game.description }}
+                />
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="flex items-center gap-1 mt-3 text-purple-400 hover:text-purple-300 transition-colors"
+                >
+                  {showFullDescription ? (
+                    <>
+                      Show Less <ChevronUp className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      Show More <ChevronDown className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.section>
+
+            {/* Platforms & Pricing */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Platforms & Pricing
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {game.platforms.map((platform, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-slate-700/60 rounded-lg p-3 border border-slate-600/50 hover:border-purple-500/50 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      {getPlatformIcon(platform)}
+                      <span className="font-medium text-white">{platform}</span>
+                    </div>
+                    {platformPrices[platform] && (
+                      <div className="text-sm text-gray-300">
+                        <div className="text-purple-400 font-semibold">{platformPrices[platform].price}</div>
+                        <div>{platformPrices[platform].platform}</div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+
+            {/* Genres */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Genres
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {gameData?.genre?.map((genre, index) => (
+                  <motion.span key={index} whileHover={{ scale: 1.05 }} className="px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 text-purple-200 rounded-full font-medium cursor-pointer hover:from-purple-600/30 hover:to-pink-600/30 transition-all duration-200">
+                    {genre}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.section>
+
+            {/* Reviews */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Reviews
+              </h2>
+              <div className="space-y-6">
+                <AnimatePresence>
+                  {game?.reviews?.slice(0, visibleReviews).map((review, index) => {
+                    const user = review?.user || { name: "Anonymous", avatar: "/placeholder.svg" };
+                    return (
+                      <motion.div
+                        key={review?.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                        className="bg-slate-700/60 rounded-lg p-4 border border-slate-600/50"
+                      >
+                        <div className="flex items-start gap-4">
+                          <img
+                            src={user?.avatar || "/placeholder.svg"}
+                            alt={user?.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <h4 className="font-semibold text-white">{user?.name}</h4>
+                                <div className="flex items-center gap-2">
+                                  {renderStars(review?.rating)}
+                                  <span className="text-sm text-gray-400">{review?.createdAt ? new Date(review?.createdAt).toLocaleDateString() : ""}</span>
+                                </div>
+                              </div>
+                              <button className="flex items-center gap-1 text-gray-400 hover:text-purple-400 transition-colors">
+                                <ThumbsUp className="w-4 h-4" />
+                                <span className="text-sm">{review?.likes}</span>
+                              </button>
+                            </div>
+                            <p className="text-gray-300 mb-3">{review?.text}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {(review?.tags || []).map((tag, tagIndex) => (
+                                <span key={tagIndex} className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded-full">{tag}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+
+                {visibleReviews < game?.reviews.length && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setVisibleReviews((prev) => prev + 2)}
+                    className="w-full py-3 bg-slate-700/50 text-gray-300 rounded-xl border border-slate-600/50 hover:bg-slate-600/50 transition-all duration-200"
+                  >
+                    Load More Reviews
+                  </motion.button>
+                )}
+              </div>
+            </motion.section>
+
+            {/* Screenshots & Media */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Screenshots & Media
+              </h2>
+              {/* Main Screenshot Display */}
+              <div className="relative mb-4">
+                {Array.isArray(gameData?.screenshots) && gameData?.screenshots.length > 0 ? (
+                  <motion.div
+                    key={currentScreenshot}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative aspect-video bg-slate-700/50 rounded-lg overflow-hidden"
+                  >
+                    <img
+                      src={gameData?.screenshots?.[currentScreenshot]?.url || "/placeholder.svg"}
+                      alt={gameData?.screenshots?.[currentScreenshot]?.caption || "Game screenshot"}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Video Play Button */}
+                    {gameData?.screenshots?.[currentScreenshot]?.type === "video" && (
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+                      >
+                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 border border-white/30">
+                          <Play className="w-8 h-8 text-white fill-white" />
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Navigation Arrows */}
+                    <button
+                      onClick={() => prevScreenshot(gameData?.screenshots)}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => nextScreenshot(gameData?.screenshots)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+
+                    {/* Caption Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <p className="text-white font-medium">{gameData?.screenshots?.[currentScreenshot]?.caption}</p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="aspect-video bg-slate-700/50 rounded-lg flex items-center justify-center text-gray-400">
+                    No screenshots available.
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnail Strip */}
+              {Array.isArray(gameData?.screenshots) && gameData?.screenshots.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {gameData?.screenshots?.map((screenshot, index) => (
+                    <motion.div
+                      key={screenshot?.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setCurrentScreenshot(index)}
+                      className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 ${index === currentScreenshot ? "border-purple-500" : "border-slate-600/50 hover:border-purple-400"}`}
+                    >
+                      <img
+                        src={screenshot?.url || "/placeholder.svg"}
+                        alt={screenshot?.caption}
+                        className="w-full h-full object-cover"
+                      />
+                      {screenshot?.type === "video" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <Play className="w-4 h-4 text-white fill-white" />
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.section>
+
+            {/* Similar Games */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+            >
+              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Similar Games
+              </h2>
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {game?.similarGames?.map((game, index) => (
+                  <motion.div
+                    key={game?.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="flex-shrink-0 w-36 bg-slate-700/60 rounded-lg overflow-hidden border border-slate-600/50 hover:border-purple-500/50 transition-all duration-200 cursor-pointer"
+                  >
+                    <img
+                      src={game?.coverImage || "/placeholder.svg"}
+                      alt={game?.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-3">
+                      <h3 className="font-semibold text-white mb-2 line-clamp-2">{game?.title}</h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        {renderStars(game?.rating)}
+                        <span className="text-sm text-gray-400">{game?.rating}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {game?.genre?.slice(0, 2).map((genre, genreIndex) => (
+                          <span key={genreIndex} className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">{genre}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+
+            {/* External Links */}
+            {game.website && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
+              >
+                <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                  External Links
+                </h2>
+                <motion.a
+                  href={gameData?.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-cyan-500 transition-all duration-200"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                  Official Website
+                </motion.a>
+              </motion.section>
+            )}
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
