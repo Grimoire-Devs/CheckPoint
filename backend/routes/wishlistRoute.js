@@ -6,10 +6,11 @@ const {
   handleGetWishlist,
   handleAddToWishlist,
   handleRemoveFromWishlist,
+  handleIsWishlisted,
 } = require("../controllers/wishlistController");
 
-
 router.get("/", verifyUser, handleGetWishlist);
+router.get("/isWishlisted/:gameId", verifyUser, handleIsWishlisted);
 
 router.patch("/add", verifyUser, handleAddToWishlist);
 router.patch("/remove", verifyUser, handleRemoveFromWishlist);

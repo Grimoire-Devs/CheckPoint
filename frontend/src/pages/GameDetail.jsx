@@ -31,7 +31,8 @@ const sampleGameData = {
   title: "Grand Theft Auto V",
   released: "2013-09-17",
   rating: 4.47,
-  coverImage: "https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg",
+  coverImage:
+    "https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg",
   playTime: 74,
   platforms: ["PC", "PlayStation 4", "Xbox One", "PlayStation 5"],
   genre: ["Action", "Adventure", "Crime"],
@@ -81,7 +82,10 @@ const sampleGameData = {
   reviews: [
     {
       id: 1,
-      user: { name: "Alex Johnson", avatar: "/placeholder.svg?height=40&width=40" },
+      user: {
+        name: "Alex Johnson",
+        avatar: "/placeholder.svg?height=40&width=40",
+      },
       rating: 5,
       text: "Absolutely incredible game! The open world is massive and there's always something to do. The story is engaging and the characters are well-developed.",
       likes: 24,
@@ -90,7 +94,10 @@ const sampleGameData = {
     },
     {
       id: 2,
-      user: { name: "Sarah Chen", avatar: "/placeholder.svg?height=40&width=40" },
+      user: {
+        name: "Sarah Chen",
+        avatar: "/placeholder.svg?height=40&width=40",
+      },
       rating: 4,
       text: "Great game with amazing graphics and gameplay. Some missions can be repetitive but overall a fantastic experience.",
       likes: 18,
@@ -182,6 +189,7 @@ export default function GameDetail() {
 
   // UI state for advanced UI
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isPlayed, setIsPlayed] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(2);
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
@@ -216,20 +224,76 @@ export default function GameDetail() {
       }
     }
     fetchData();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
+  }, [id, baseUrl]);
+
+  // Check if user is logged in and fetch game status
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!user || !token) {
+      setIsWishlisted(false);
+      setIsPlayed(false);
+      return;
+    }
+
+    let ignore = false;
+    async function fetchGameStatus() {
+      try {
+        // Check if game is wishlisted
+        const wishlistRes = await fetch(
+          `${baseUrl}/wishlist/isWishlisted/${id}`,
+          {
+            credentials: "include",
+          }
+        );
+        if (!ignore && wishlistRes.ok) {
+          const wishlistData = await wishlistRes.json();
+          setIsWishlisted(wishlistData.isWishlisted);
+        }
+
+        // Check if game is played (has review)
+        const playedRes = await fetch(`${baseUrl}/reviews/isPlayed/${id}`, {
+          credentials: "include",
+        });
+        console.log(playedRes);
+        if (!ignore && playedRes.ok) {
+          const playedData = await playedRes.json();
+          setIsPlayed(playedData.isPlayed);
+        }
+      } catch (e) {
+        console.error("Error fetching game status:", e);
+      }
+    }
+
+    fetchGameStatus();
+    return () => {
+      ignore = true;
+    };
   }, [id, baseUrl]);
 
   // Wishlist handler
   const handleWishlist = async () => {
-    setIsWishlisted((prev) => !prev);
     try {
-      await fetch(`${baseUrl}/wishlist/add`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId: id }),
-      });
-    } catch (e) {}
+      const response = await fetch(
+        `${baseUrl}/wishlist/${isWishlisted ? "remove" : "add"}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ gameId: id }),
+        }
+      );
+
+      if (response.ok) {
+        setIsWishlisted((prev) => !prev);
+      }
+    } catch (e) {
+      console.error("Error updating wishlist:", e);
+    }
   };
 
   // Scroll helpers
@@ -242,7 +306,8 @@ export default function GameDetail() {
   // Helper functions for UI
   const getPlatformIcon = (platform) => {
     if (platform.includes("PC")) return <Monitor className="w-4 h-4" />;
-    if (platform.includes("PlayStation")) return <Gamepad2 className="w-4 h-4" />;
+    if (platform.includes("PlayStation"))
+      return <Gamepad2 className="w-4 h-4" />;
     if (platform.includes("Xbox")) return <Gamepad2 className="w-4 h-4" />;
     return <Smartphone className="w-4 h-4" />;
   };
@@ -259,8 +324,8 @@ export default function GameDetail() {
               i < fullStars
                 ? "fill-yellow-400 text-yellow-400"
                 : i === fullStars && hasHalfStar
-                  ? "fill-yellow-400/50 text-yellow-400"
-                  : "text-gray-600"
+                ? "fill-yellow-400/50 text-yellow-400"
+                : "text-gray-600"
             }`}
           />
         ))}
@@ -271,7 +336,9 @@ export default function GameDetail() {
     setCurrentScreenshot((prev) => (prev + 1) % screenshots.length);
   };
   const prevScreenshot = (screenshots) => {
-    setCurrentScreenshot((prev) => (prev - 1 + screenshots.length) % screenshots.length);
+    setCurrentScreenshot(
+      (prev) => (prev - 1 + screenshots.length) % screenshots.length
+    );
   };
 
   // Use API data if available, otherwise fallback to sample data
@@ -347,7 +414,9 @@ export default function GameDetail() {
                     <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                       {gameData?.title}
                     </h1>
-                    <p className="text-xl text-gray-300">{formatDate(gameData?.released)}</p>
+                    <p className="text-xl text-gray-300">
+                      {formatDate(gameData?.released)}
+                    </p>
                   </motion.div>
                   {/* Stats */}
                   <motion.div
@@ -358,12 +427,19 @@ export default function GameDetail() {
                   >
                     <div className="flex items-center gap-2">
                       {renderStars(gameData?.rating, "w-5 h-5")}
-                      <span className="font-semibold text-white">{gameData?.rating}</span>
-                      <span className="text-sm">({gameData?.ratings_count?.toLocaleString?.() || 0} ratings)</span>
+                      <span className="font-semibold text-white">
+                        {gameData?.rating}
+                      </span>
+                      <span className="text-sm">
+                        ({gameData?.ratings_count?.toLocaleString?.() || 0}{" "}
+                        ratings)
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Trophy className="w-5 h-5 text-yellow-500" />
-                      <span className="font-semibold">{gameData?.metacritic}</span>
+                      <span className="font-semibold">
+                        {gameData?.metacritic}
+                      </span>
                       <span className="text-sm">Metacritic</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -379,7 +455,10 @@ export default function GameDetail() {
                     className="flex flex-wrap gap-2"
                   >
                     {gameData?.platforms?.map((platform, index) => (
-                      <span key={index} className="flex items-center gap-2 px-3 py-1 bg-slate-700/50 text-gray-300 rounded-full text-sm border border-slate-600/50">
+                      <span
+                        key={index}
+                        className="flex items-center gap-2 px-3 py-1 bg-slate-700/50 text-gray-300 rounded-full text-sm border border-slate-600/50"
+                      >
                         {getPlatformIcon(platform)}
                         {platform}
                       </span>
@@ -402,13 +481,29 @@ export default function GameDetail() {
                           : "bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600/50"
                       }`}
                     >
-                      {isWishlisted ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      {isWishlisted ? (
+                        <Check className="w-5 h-5" />
+                      ) : (
+                        <Plus className="w-5 h-5" />
+                      )}
                       {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => scrollToSection(reviewsRef)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        isPlayed
+                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+                          : "bg-slate-700/50 text-gray-300 hover:bg-slate-600/50 border border-slate-600/50"
+                      }`}
+                    >
+                      <Monitor className="w-5 h-5" />
+                      {isPlayed ? "Played" : "Not Played"}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate(`/reviews/${id}`)}
                       className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-500 hover:to-pink-500 transition-all duration-200"
                     >
                       <Edit3 className="w-5 h-5" />
@@ -452,10 +547,16 @@ export default function GameDetail() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1 w-12">
-                          <motion.span className="text-white font-medium text-sm" whileHover={{ scale: 1.1 }}>
+                          <motion.span
+                            className="text-white font-medium text-sm"
+                            whileHover={{ scale: 1.1 }}
+                          >
                             {item.rating}
                           </motion.span>
-                          <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
+                          <motion.div
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.5 }}
+                          >
                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           </motion.div>
                         </div>
@@ -463,7 +564,10 @@ export default function GameDetail() {
                           <div className="bg-slate-700/50 rounded-full h-2 overflow-hidden border border-slate-600/30 group-hover:border-purple-500/50 transition-all duration-300">
                             <motion.div
                               initial={{ width: 0, opacity: 0.7 }}
-                              whileInView={{ width: `${item.percentage}%`, opacity: 1 }}
+                              whileInView={{
+                                width: `${item.percentage}%`,
+                                opacity: 1,
+                              }}
                               transition={{
                                 duration: 1.2,
                                 delay: 0.3 + index * 0.1,
@@ -473,12 +577,12 @@ export default function GameDetail() {
                                 item.rating === 5
                                   ? "bg-gradient-to-r from-green-500 to-green-400"
                                   : item.rating === 4
-                                    ? "bg-gradient-to-r from-blue-500 to-blue-400"
-                                    : item.rating === 3
-                                      ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
-                                      : item.rating === 2
-                                        ? "bg-gradient-to-r from-orange-500 to-orange-400"
-                                        : "bg-gradient-to-r from-red-600 to-red-500"
+                                  ? "bg-gradient-to-r from-blue-500 to-blue-400"
+                                  : item.rating === 3
+                                  ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                  : item.rating === 2
+                                  ? "bg-gradient-to-r from-orange-500 to-orange-400"
+                                  : "bg-gradient-to-r from-red-600 to-red-500"
                               }`}
                             >
                               {/* Animated shine effect */}
@@ -500,10 +604,17 @@ export default function GameDetail() {
                           className="text-right min-w-[60px]"
                           initial={{ opacity: 0, scale: 0.8 }}
                           whileInView={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                          transition={{
+                            duration: 0.4,
+                            delay: 0.5 + index * 0.1,
+                          }}
                         >
-                          <div className="text-white font-medium text-sm">{item.count.toLocaleString()}</div>
-                          <div className="text-purple-300 text-xs">{item.percentage}%</div>
+                          <div className="text-white font-medium text-sm">
+                            {item.count.toLocaleString()}
+                          </div>
+                          <div className="text-purple-300 text-xs">
+                            {item.percentage}%
+                          </div>
                         </motion.div>
                       </div>
                     </motion.div>
@@ -513,14 +624,31 @@ export default function GameDetail() {
                 {/* Stats Summary */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Total Reviews", value: game.ratings_count.toLocaleString(), icon: "📊" },
-                    { label: "Average Rating", value: game.rating, icon: "⭐" },
+                    {
+                      label: "Total Reviews",
+                      value: game?.ratings_count.toLocaleString(),
+                      icon: "📊",
+                    },
+                    {
+                      label: "Average Rating",
+                      value: game?.rating,
+                      icon: "⭐",
+                    },
                     {
                       label: "Positive Reviews",
-                      value: `${Math.round(((ratingDistribution[0].count + ratingDistribution[1].count) / game.ratings_count) * 100)}%`,
+                      value: `${Math.round(
+                        ((ratingDistribution[0]?.count +
+                          ratingDistribution[1]?.count) /
+                          game?.ratings_count) *
+                          100
+                      )}%`,
                       icon: "👍",
                     },
-                    { label: "Metacritic Score", value: game.metacritic, icon: "🏆" },
+                    {
+                      label: "Metacritic Score",
+                      value: game?.metacritic,
+                      icon: "🏆",
+                    },
                   ].map((stat, index) => (
                     <motion.div
                       key={stat.label}
@@ -534,7 +662,9 @@ export default function GameDetail() {
                       className="bg-slate-700/60 rounded-lg p-3 text-center border border-slate-600/50 hover:border-purple-500/50 transition-all duration-300"
                     >
                       <div className="text-lg mb-1">{stat.icon}</div>
-                      <div className="text-white font-bold text-sm">{stat.value}</div>
+                      <div className="text-white font-bold text-sm">
+                        {stat.value}
+                      </div>
                       <div className="text-gray-300 text-xs">{stat.label}</div>
                     </motion.div>
                   ))}
@@ -599,7 +729,9 @@ export default function GameDetail() {
                     </div>
                     {platformPrices[platform] && (
                       <div className="text-sm text-gray-300">
-                        <div className="text-purple-400 font-semibold">{platformPrices[platform].price}</div>
+                        <div className="text-purple-400 font-semibold">
+                          {platformPrices[platform].price}
+                        </div>
                         <div>{platformPrices[platform].platform}</div>
                       </div>
                     )}
@@ -621,7 +753,11 @@ export default function GameDetail() {
               </h2>
               <div className="flex flex-wrap gap-3">
                 {gameData?.genre?.map((genre, index) => (
-                  <motion.span key={index} whileHover={{ scale: 1.05 }} className="px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 text-purple-200 rounded-full font-medium cursor-pointer hover:from-purple-600/30 hover:to-pink-600/30 transition-all duration-200">
+                  <motion.span
+                    key={index}
+                    whileHover={{ scale: 1.05 }}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 text-purple-200 rounded-full font-medium cursor-pointer hover:from-purple-600/30 hover:to-pink-600/30 transition-all duration-200"
+                  >
                     {genre}
                   </motion.span>
                 ))}
@@ -641,48 +777,70 @@ export default function GameDetail() {
               </h2>
               <div className="space-y-6">
                 <AnimatePresence>
-                  {game?.reviews?.slice(0, visibleReviews).map((review, index) => {
-                    const user = review?.user || { name: "Anonymous", avatar: "/placeholder.svg" };
-                    return (
-                      <motion.div
-                        key={review?.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                        className="bg-slate-700/60 rounded-lg p-4 border border-slate-600/50"
-                      >
-                        <div className="flex items-start gap-4">
-                          <img
-                            src={user?.avatar || "/placeholder.svg"}
-                            alt={user?.name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <h4 className="font-semibold text-white">{user?.name}</h4>
-                                <div className="flex items-center gap-2">
-                                  {renderStars(review?.rating)}
-                                  <span className="text-sm text-gray-400">{review?.createdAt ? new Date(review?.createdAt).toLocaleDateString() : ""}</span>
+                  {game?.reviews
+                    ?.slice(0, visibleReviews)
+                    .map((review, index) => {
+                      const user = review?.user || {
+                        name: "Anonymous",
+                        avatar: "/placeholder.svg",
+                      };
+                      return (
+                        <motion.div
+                          key={review?.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                          className="bg-slate-700/60 rounded-lg p-4 border border-slate-600/50"
+                        >
+                          <div className="flex items-start gap-4">
+                            <img
+                              src={user?.avatar || "/placeholder.svg"}
+                              alt={user?.name}
+                              className="w-12 h-12 rounded-full object-cover"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-2">
+                                <div>
+                                  <h4 className="font-semibold text-white">
+                                    {user?.name}
+                                  </h4>
+                                  <div className="flex items-center gap-2">
+                                    {renderStars(review?.rating)}
+                                    <span className="text-sm text-gray-400">
+                                      {review?.createdAt
+                                        ? new Date(
+                                            review?.createdAt
+                                          ).toLocaleDateString()
+                                        : ""}
+                                    </span>
+                                  </div>
                                 </div>
+                                <button className="flex items-center gap-1 text-gray-400 hover:text-purple-400 transition-colors">
+                                  <ThumbsUp className="w-4 h-4" />
+                                  <span className="text-sm">
+                                    {review?.likes}
+                                  </span>
+                                </button>
                               </div>
-                              <button className="flex items-center gap-1 text-gray-400 hover:text-purple-400 transition-colors">
-                                <ThumbsUp className="w-4 h-4" />
-                                <span className="text-sm">{review?.likes}</span>
-                              </button>
-                            </div>
-                            <p className="text-gray-300 mb-3">{review?.text}</p>
-                            <div className="flex flex-wrap gap-2">
-                              {(review?.tags || []).map((tag, tagIndex) => (
-                                <span key={tagIndex} className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded-full">{tag}</span>
-                              ))}
+                              <p className="text-gray-300 mb-3">
+                                {review?.text}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {(review?.tags || []).map((tag, tagIndex) => (
+                                  <span
+                                    key={tagIndex}
+                                    className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded-full"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                        </motion.div>
+                      );
+                    })}
                 </AnimatePresence>
 
                 {visibleReviews < game?.reviews.length && (
@@ -711,7 +869,8 @@ export default function GameDetail() {
               </h2>
               {/* Main Screenshot Display */}
               <div className="relative mb-4">
-                {Array.isArray(gameData?.screenshots) && gameData?.screenshots.length > 0 ? (
+                {Array.isArray(gameData?.screenshots) &&
+                gameData?.screenshots.length > 0 ? (
                   <motion.div
                     key={currentScreenshot}
                     initial={{ opacity: 0 }}
@@ -720,13 +879,20 @@ export default function GameDetail() {
                     className="relative aspect-video bg-slate-700/50 rounded-lg overflow-hidden"
                   >
                     <img
-                      src={gameData?.screenshots?.[currentScreenshot]?.url || "/placeholder.svg"}
-                      alt={gameData?.screenshots?.[currentScreenshot]?.caption || "Game screenshot"}
+                      src={
+                        gameData?.screenshots?.[currentScreenshot]?.url ||
+                        "/placeholder.svg"
+                      }
+                      alt={
+                        gameData?.screenshots?.[currentScreenshot]?.caption ||
+                        "Game screenshot"
+                      }
                       className="w-full h-full object-cover"
                     />
 
                     {/* Video Play Button */}
-                    {gameData?.screenshots?.[currentScreenshot]?.type === "video" && (
+                    {gameData?.screenshots?.[currentScreenshot]?.type ===
+                      "video" && (
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -754,7 +920,9 @@ export default function GameDetail() {
 
                     {/* Caption Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <p className="text-white font-medium">{gameData?.screenshots?.[currentScreenshot]?.caption}</p>
+                      <p className="text-white font-medium">
+                        {gameData?.screenshots?.[currentScreenshot]?.caption}
+                      </p>
                     </div>
                   </motion.div>
                 ) : (
@@ -765,30 +933,35 @@ export default function GameDetail() {
               </div>
 
               {/* Thumbnail Strip */}
-              {Array.isArray(gameData?.screenshots) && gameData?.screenshots.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {gameData?.screenshots?.map((screenshot, index) => (
-                    <motion.div
-                      key={screenshot?.id}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setCurrentScreenshot(index)}
-                      className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 ${index === currentScreenshot ? "border-purple-500" : "border-slate-600/50 hover:border-purple-400"}`}
-                    >
-                      <img
-                        src={screenshot?.url || "/placeholder.svg"}
-                        alt={screenshot?.caption}
-                        className="w-full h-full object-cover"
-                      />
-                      {screenshot?.type === "video" && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <Play className="w-4 h-4 text-white fill-white" />
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+              {Array.isArray(gameData?.screenshots) &&
+                gameData?.screenshots.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {gameData?.screenshots?.map((screenshot, index) => (
+                      <motion.div
+                        key={screenshot?.id}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setCurrentScreenshot(index)}
+                        className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
+                          index === currentScreenshot
+                            ? "border-purple-500"
+                            : "border-slate-600/50 hover:border-purple-400"
+                        }`}
+                      >
+                        <img
+                          src={screenshot?.url || "/placeholder.svg"}
+                          alt={screenshot?.caption}
+                          className="w-full h-full object-cover"
+                        />
+                        {screenshot?.type === "video" && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <Play className="w-4 h-4 text-white fill-white" />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
             </motion.section>
 
             {/* Similar Games */}
@@ -818,14 +991,23 @@ export default function GameDetail() {
                       className="w-full h-48 object-cover"
                     />
                     <div className="p-3">
-                      <h3 className="font-semibold text-white mb-2 line-clamp-2">{game?.title}</h3>
+                      <h3 className="font-semibold text-white mb-2 line-clamp-2">
+                        {game?.title}
+                      </h3>
                       <div className="flex items-center gap-2 mb-2">
                         {renderStars(game?.rating)}
-                        <span className="text-sm text-gray-400">{game?.rating}</span>
+                        <span className="text-sm text-gray-400">
+                          {game?.rating}
+                        </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {game?.genre?.slice(0, 2).map((genre, genreIndex) => (
-                          <span key={genreIndex} className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full">{genre}</span>
+                          <span
+                            key={genreIndex}
+                            className="px-2 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full"
+                          >
+                            {genre}
+                          </span>
                         ))}
                       </div>
                     </div>

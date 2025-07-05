@@ -34,6 +34,28 @@ const logGame = async (req, res) => {
   }
 };
 
+const isGamePlayed = async (req, res) => {
+  const user = req.user;
+  const gameId = req.params.gameId;
+  
+  if (!user) {
+    return res.status(401).json({ error: "Login to Continue" });
+  }
+  
+  try {
+    const review = await Review.findOne({
+      game: gameId,
+      createdBy: user._id
+    });
+    
+    const isPlayed = !!review;
+    
+    return res.status(200).json({ isPlayed });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 const getGameReview = async (req, res) => {
   const reviewId = new mongoose.Types.ObjectId(req.params.id);
   try {
@@ -103,4 +125,5 @@ module.exports = {
   getGameReview,
   deleteGameReview,
   updateGameReview,
+  isGamePlayed,
 };
