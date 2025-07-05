@@ -54,13 +54,6 @@ app.get(
   Oauth
 );
 
-// const Games = require("./models/game");
-// app.get("/games", async (req, res) => {
-//   const latestGames = await Games.find().limit(50).sort({ released: -1 });
-//   const topRatedGames = await Games.find().limit(50).sort({ rating: -1 });
-//   res.send({ latestGames, topRatedGames });
-// });
-
 app.use("/", require("./routes/userRoute"));
 app.use("/review", require("./routes/reviewRoute"));
 app.use("/profile", require("./routes/profileRoute"));

@@ -122,7 +122,10 @@ router.get("/:id/reviews", async (req, res) => {
   try {
     const game = await Game.findById(gameId).populate({
       path: "reviews",
-      populate: { path: "createdBy", select: "userName" },
+      populate: {
+        path: "createdBy",
+        select: "userName name profileImage email",
+      },
     });
     if (!game) {
       return res.status(404).json({ error: "Game not found" });

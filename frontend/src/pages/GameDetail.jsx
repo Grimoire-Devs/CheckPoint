@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
 import Footer from "../components/Footer";
+import ReviewComponent from "../components/reviewComponent";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
@@ -143,6 +144,13 @@ const platformPrices = {
   "PlayStation 4": { price: "₹1,999", platform: "PS Store" },
   "Xbox One": { price: "₹1,799", platform: "Xbox Store" },
   "PlayStation 5": { price: "₹2,499", platform: "PS Store" },
+  "Nintendo Switch": { price: "₹2,999", platform: "Nintendo eShop" },
+  "Xbox Series X": { price: "₹2,799", platform: "Xbox Store" },
+  "Xbox Series S": { price: "₹2,299", platform: "Xbox Store" },
+  macOS: { price: "₹1,299", platform: "Mac App Store" },
+  Linux: { price: "₹999", platform: "Steam" },
+  Android: { price: "₹499", platform: "Google Play" },
+  iOS: { price: "₹599", platform: "App Store" },
 };
 
 const GameDetailSkeleton = () => (
@@ -193,6 +201,7 @@ export default function GameDetail() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [visibleReviews, setVisibleReviews] = useState(2);
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
+  const [reviewsLoaded, setReviewsLoaded] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -211,9 +220,15 @@ export default function GameDetail() {
         const reviewRes = await fetch(`${baseUrl}/games/${id}/reviews`);
         const reviewData = await reviewRes.json();
         if (!ignore && reviewData && reviewData.reviews) {
-          setReviews(reviewData.reviews);
+          // Sort reviews by date (latest first) and filter out any empty reviews
+          const sortedReviews = reviewData.reviews
+            .filter((review) => review && review.createdBy) // Filter out empty reviews
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setReviews(sortedReviews);
+          setReviewsLoaded(true);
         } else {
           setReviews([]);
+          setReviewsLoaded(true);
         }
       } catch (e) {
         setApiError(true);
@@ -256,7 +271,7 @@ export default function GameDetail() {
         }
 
         // Check if game is played (has review)
-        const playedRes = await fetch(`${baseUrl}/reviews/isPlayed/${id}`, {
+        const playedRes = await fetch(`${baseUrl}/review/isPlayed/${id}`, {
           credentials: "include",
         });
         console.log(playedRes);
@@ -294,6 +309,17 @@ export default function GameDetail() {
     } catch (e) {
       console.error("Error updating wishlist:", e);
     }
+  };
+
+  // Handler functions for ReviewCard
+  const handleUserClick = (userId) => {
+    // Navigate to user profile
+    navigate(`/profile/${userId}`);
+  };
+
+  const handleGameClick = (gameId) => {
+    // Navigate to game detail
+    navigate(`/games/${gameId}`);
   };
 
   // Scroll helpers
@@ -717,7 +743,7 @@ export default function GameDetail() {
                 Platforms & Pricing
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {game.platforms.map((platform, index) => (
+                {gameData?.platforms?.map((platform, index) => (
                   <motion.div
                     key={index}
                     whileHover={{ scale: 1.02 }}
@@ -727,12 +753,17 @@ export default function GameDetail() {
                       {getPlatformIcon(platform)}
                       <span className="font-medium text-white">{platform}</span>
                     </div>
-                    {platformPrices[platform] && (
+                    {platformPrices[platform] ? (
                       <div className="text-sm text-gray-300">
                         <div className="text-purple-400 font-semibold">
                           {platformPrices[platform].price}
                         </div>
                         <div>{platformPrices[platform].platform}</div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-400">
+                        <div>Price not available</div>
+                        <div>Check store</div>
                       </div>
                     )}
                   </motion.div>
@@ -764,7 +795,7 @@ export default function GameDetail() {
               </div>
             </motion.section>
 
-            {/* Reviews */}
+            {/* Reviews Section with New Review Cards */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -772,86 +803,54 @@ export default function GameDetail() {
               viewport={{ once: true }}
               className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
             >
-              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                Reviews
+              <h2 className="text-xl font-bold text-white mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                Reviews ({reviews.length})
               </h2>
-              <div className="space-y-6">
-                <AnimatePresence>
-                  {game?.reviews
-                    ?.slice(0, visibleReviews)
-                    .map((review, index) => {
-                      const user = review?.user || {
-                        name: "Anonymous",
-                        avatar: "/placeholder.svg",
-                      };
-                      return (
-                        <motion.div
-                          key={review?.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.4, delay: index * 0.1 }}
-                          className="bg-slate-700/60 rounded-lg p-4 border border-slate-600/50"
-                        >
-                          <div className="flex items-start gap-4">
-                            <img
-                              src={user?.avatar || "/placeholder.svg"}
-                              alt={user?.name}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <div>
-                                  <h4 className="font-semibold text-white">
-                                    {user?.name}
-                                  </h4>
-                                  <div className="flex items-center gap-2">
-                                    {renderStars(review?.rating)}
-                                    <span className="text-sm text-gray-400">
-                                      {review?.createdAt
-                                        ? new Date(
-                                            review?.createdAt
-                                          ).toLocaleDateString()
-                                        : ""}
-                                    </span>
-                                  </div>
-                                </div>
-                                <button className="flex items-center gap-1 text-gray-400 hover:text-purple-400 transition-colors">
-                                  <ThumbsUp className="w-4 h-4" />
-                                  <span className="text-sm">
-                                    {review?.likes}
-                                  </span>
-                                </button>
-                              </div>
-                              <p className="text-gray-300 mb-3">
-                                {review?.text}
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {(review?.tags || []).map((tag, tagIndex) => (
-                                  <span
-                                    key={tagIndex}
-                                    className="px-2 py-1 bg-indigo-600/20 text-indigo-300 text-xs rounded-full"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                </AnimatePresence>
 
-                {visibleReviews < game?.reviews.length && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setVisibleReviews((prev) => prev + 2)}
-                    className="w-full py-3 bg-slate-700/50 text-gray-300 rounded-xl border border-slate-600/50 hover:bg-slate-600/50 transition-all duration-200"
-                  >
-                    Load More Reviews
-                  </motion.button>
+              <div className="space-y-6">
+                {!reviewsLoaded ? (
+                  // Show skeleton while loading
+                  [...Array(3)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="bg-slate-700/60 rounded-lg p-4 border border-slate-600/50 animate-pulse"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-slate-600 rounded-full"></div>
+                        <div className="flex-1 space-y-3">
+                          <div className="h-4 bg-slate-600 rounded w-1/4"></div>
+                          <div className="h-3 bg-slate-600 rounded w-3/4"></div>
+                          <div className="h-3 bg-slate-600 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <AnimatePresence>
+                      {reviews.slice(0, visibleReviews).map((review, index) => (
+                        <ReviewComponent
+                          key={review._id || `review-${index}`}
+                          review={review}
+                          index={index}
+                          onUserClick={handleUserClick}
+                          onGameClick={handleGameClick}
+                        />
+                      ))}
+                    </AnimatePresence>
+
+                    {visibleReviews < reviews.length && (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setVisibleReviews((prev) => prev + 3)}
+                        className="w-full py-3 bg-gradient-to-r from-slate-700/50 to-slate-600/50 text-gray-300 rounded-xl border border-slate-600/50 hover:from-slate-600/50 hover:to-slate-500/50 hover:border-purple-500/50 transition-all duration-200 font-medium"
+                      >
+                        Load More Reviews ({reviews.length - visibleReviews}{" "}
+                        remaining)
+                      </motion.button>
+                    )}
+                  </>
                 )}
               </div>
             </motion.section>
