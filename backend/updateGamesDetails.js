@@ -18,6 +18,16 @@ async function fetchGameDetails(id) {
   return await response.json();
 }
 
+async function fetchGameScreenshots(id) {
+  const response = await fetch(
+    `https://api.rawg.io/api/games/${id}/screenshots?key=${apiKey}`
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch screenshots for game with ID ${id}`);
+  }
+  return await response.json();
+}
+
 async function updateGames(batchSize = 100) {
   const client = new MongoClient(uri);
   try {
@@ -82,4 +92,91 @@ async function updateGames(batchSize = 100) {
   }
 }
 
-updateGames();
+async function updateGameScreenshots(
+  skipCount = 480,
+  maxGames = 120,
+  batchSize = 50
+) {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+
+    let processedCount = 0;
+    let currentSkip = skipCount;
+
+    while (processedCount < maxGames) {
+      const docs = await collection
+        .find({
+          id: { $exists: true },
+          $or: [
+            { screenshots: { $exists: false } },
+            { screenshots: { $size: 0 } },
+          ],
+        })
+        .skip(currentSkip)
+        .limit(batchSize)
+        .toArray();
+
+      if (docs.length === 0) {
+        console.log("No more games found without screenshots");
+        break;
+      }
+
+      for (const doc of docs) {
+        if (processedCount >= maxGames) break;
+
+        try {
+          const screenshotsData = await fetchGameScreenshots(doc.id);
+
+          // Extract screenshots from the response
+          const screenshots = screenshotsData.results || [];
+
+          const result = await collection.updateOne(
+            { _id: doc._id },
+            { $set: { screenshots: screenshots } }
+          );
+
+          if (result.modifiedCount > 0) {
+            console.log(
+              `Updated screenshots for game _id: ${doc._id} (${
+                doc.title || doc.id
+              }) - ${screenshots.length} screenshots`
+            );
+          } else {
+            console.log(
+              `No screenshots update needed for game _id: ${doc._id} (${
+                doc.title || doc.id
+              })`
+            );
+          }
+          processedCount++;
+
+          // Add a small delay to avoid hitting API rate limits
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (error) {
+          console.error(
+            `Error updating screenshots for game ID ${doc.id}:`,
+            error.message
+          );
+          processedCount++; // Still count it to avoid infinite loops
+        }
+      }
+      currentSkip += batchSize;
+      console.log(
+        `Processed ${processedCount} games so far... (skipped ${skipCount} initial games)`
+      );
+    }
+    console.log(
+      `Finished updating screenshots. Processed ${processedCount} games.`
+    );
+  } catch (error) {
+    console.error("Error updating game screenshots:", error.message);
+  } finally {
+    await client.close();
+  }
+}
+
+// updateGames();
+updateGameScreenshots();

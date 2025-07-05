@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
 
+const screenshotSchema = new mongoose.Schema({
+  id: Number,
+  image: String,
+  width: Number,
+  height: Number,
+  is_deleted: Boolean,
+});
+
 const gameSchema = new mongoose.Schema(
   {
     id: Number,
@@ -14,6 +22,7 @@ const gameSchema = new mongoose.Schema(
     metacritic: Number,
     ratings_count: Number,
     website: String,
+    screenshots: [screenshotSchema],
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -202,6 +202,7 @@ export default function GameDetail() {
   const [visibleReviews, setVisibleReviews] = useState(2);
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
   const [reviewsLoaded, setReviewsLoaded] = useState(false);
+  const [autoScrollInterval, setAutoScrollInterval] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -358,13 +359,42 @@ export default function GameDetail() {
       </div>
     );
   };
-  const nextScreenshot = (screenshots) => {
-    setCurrentScreenshot((prev) => (prev + 1) % screenshots.length);
+  const pauseAutoScroll = () => {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      setAutoScrollInterval(null);
+    }
   };
+
+  const resumeAutoScroll = () => {
+    if (
+      gameData?.screenshots &&
+      gameData.screenshots.length > 1 &&
+      !autoScrollInterval
+    ) {
+      const interval = setInterval(() => {
+        setCurrentScreenshot(
+          (prev) => (prev + 1) % gameData.screenshots.length
+        );
+      }, 3000);
+      setAutoScrollInterval(interval);
+    }
+  };
+
+  const nextScreenshot = (screenshots) => {
+    pauseAutoScroll();
+    setCurrentScreenshot((prev) => (prev + 1) % screenshots.length);
+    // Resume auto-scroll after 5 seconds of inactivity
+    setTimeout(resumeAutoScroll, 5000);
+  };
+
   const prevScreenshot = (screenshots) => {
+    pauseAutoScroll();
     setCurrentScreenshot(
       (prev) => (prev - 1 + screenshots.length) % screenshots.length
     );
+    // Resume auto-scroll after 5 seconds of inactivity
+    setTimeout(resumeAutoScroll, 5000);
   };
 
   // Use API data if available, otherwise fallback to sample data
@@ -375,6 +405,32 @@ export default function GameDetail() {
         reviews: reviews.length > 0 ? reviews : sampleGameData.reviews,
       }
     : { ...sampleGameData };
+
+  // Auto-scroll screenshots
+  useEffect(() => {
+    if (gameData?.screenshots && gameData.screenshots.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentScreenshot(
+          (prev) => (prev + 1) % gameData.screenshots.length
+        );
+      }, 3000); // Change screenshot every 3 seconds
+
+      setAutoScrollInterval(interval);
+
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [gameData?.screenshots]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (autoScrollInterval) {
+        clearInterval(autoScrollInterval);
+      }
+    };
+  }, [autoScrollInterval]);
 
   // Show skeleton while loading
   if (loading) {
@@ -712,7 +768,10 @@ export default function GameDetail() {
               <div className="text-gray-300 leading-relaxed">
                 <div
                   className={`${!showFullDescription ? "line-clamp-3" : ""}`}
-                  dangerouslySetInnerHTML={{ __html: game.description }}
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      gameData?.description || "No description available.",
+                  }}
                 />
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
@@ -863,22 +922,36 @@ export default function GameDetail() {
               viewport={{ once: true }}
               className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50"
             >
-              <h2 className="text-xl font-bold text-white mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                Screenshots & Media
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                  Screenshots & Media
+                </h2>
+                {gameData?.screenshots && gameData.screenshots.length > 1 && (
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <div
+                      className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+                        autoScrollInterval ? "bg-green-400" : "bg-gray-500"
+                      }`}
+                    ></div>
+                    <span>{autoScrollInterval ? "Auto-scroll" : "Paused"}</span>
+                  </div>
+                )}
+              </div>
               {/* Main Screenshot Display */}
               <div className="relative mb-4">
                 {Array.isArray(gameData?.screenshots) &&
                 gameData?.screenshots.length > 0 ? (
                   <motion.div
                     key={currentScreenshot}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative aspect-video bg-slate-700/50 rounded-lg overflow-hidden"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="relative aspect-[16/9] max-h-80 lg:max-h-96 bg-slate-700/50 rounded-lg overflow-hidden mx-auto max-w-3xl lg:max-w-4xl"
                   >
                     <img
                       src={
+                        gameData?.screenshots?.[currentScreenshot]?.image ||
                         gameData?.screenshots?.[currentScreenshot]?.url ||
                         "/placeholder.svg"
                       }
@@ -925,7 +998,7 @@ export default function GameDetail() {
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="aspect-video bg-slate-700/50 rounded-lg flex items-center justify-center text-gray-400">
+                  <div className="aspect-[16/9] max-h-80 lg:max-h-96 bg-slate-700/50 rounded-lg flex items-center justify-center text-gray-400 mx-auto max-w-3xl lg:max-w-4xl">
                     No screenshots available.
                   </div>
                 )}
@@ -934,21 +1007,30 @@ export default function GameDetail() {
               {/* Thumbnail Strip */}
               {Array.isArray(gameData?.screenshots) &&
                 gameData?.screenshots.length > 0 && (
-                  <div className="flex gap-2 overflow-x-auto pb-2">
+                  <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
                     {gameData?.screenshots?.map((screenshot, index) => (
                       <motion.div
                         key={screenshot?.id}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setCurrentScreenshot(index)}
-                        className={`relative flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
+                        onClick={() => {
+                          pauseAutoScroll();
+                          setCurrentScreenshot(index);
+                          // Resume auto-scroll after 5 seconds of inactivity
+                          setTimeout(resumeAutoScroll, 5000);
+                        }}
+                        className={`relative flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
                           index === currentScreenshot
                             ? "border-purple-500"
                             : "border-slate-600/50 hover:border-purple-400"
                         }`}
                       >
                         <img
-                          src={screenshot?.url || "/placeholder.svg"}
+                          src={
+                            screenshot?.image ||
+                            screenshot?.url ||
+                            "/placeholder.svg"
+                          }
                           alt={screenshot?.caption}
                           className="w-full h-full object-cover"
                         />
@@ -975,7 +1057,7 @@ export default function GameDetail() {
                 Similar Games
               </h2>
               <div className="flex gap-4 overflow-x-auto pb-4">
-                {game?.similarGames?.map((game, index) => (
+                {gameData?.similarGames?.map((game, index) => (
                   <motion.div
                     key={game?.id}
                     initial={{ opacity: 0, x: 20 }}
@@ -1016,7 +1098,7 @@ export default function GameDetail() {
             </motion.section>
 
             {/* External Links */}
-            {game.website && (
+            {gameData?.website && (
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
