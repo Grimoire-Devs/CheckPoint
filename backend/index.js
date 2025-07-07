@@ -38,7 +38,7 @@ app.use(morgan("dev"));
 databaseConnect();
 
 app.get("/", (req, res) => {
-  res.send("Hello!!");
+  res.status(200).send("OK");
 });
 
 app.get(
@@ -71,4 +71,13 @@ app.listen(PORT, () => {
 cron.schedule("20 0 * * *", async () => {
   console.log("Updating Game Data at 12:20 AM");
   await fetchAndUpdate(5);
+});
+
+cron.schedule("*/14 * * * *", async () => {
+  try {
+    await fetch("https://checkpoint-yjmv.onrender.com/");
+    console.log("Pinged self to stay alive");
+  } catch (e) {
+    console.error("Failed to ping self", e.message);
+  }
 });
