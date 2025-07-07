@@ -160,10 +160,66 @@ const handleUpdateProfile = async function (req, res) {
   });
 };
 
+const handleGetUserId = async function (req, res) {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  let user;
+  try {
+    user = await User.findById({ _id: id})
+    if(user)
+      return res.status(200).json({ userId: user._id });
+  }catch (e) {
+    console.error(e);
+  }
+  try{
+    user = await User.findOne({ userName: id });
+    if(user)
+      return res.status(200).json({ userId: user._id });
+  }catch (e) {
+    console.error(e);
+  }
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  return res.status(200).json({ userId: user._id });
+}
+
+const handleGetProfileByUserId = async function (req, res) {
+  const userId = req.params.userId;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userProfile = await Profile.findOne({ user : userId });
+    if (!userProfile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+    await userProfile.populate(POPULATE_PATHS);
+    userProfile.reviews.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    userProfile.wishlist.sort(
+      (a, b) => new Date(b.addedAt) - new Date(a.addedAt)
+    );
+    return res.status(200).json({ profile: userProfile });
+  }catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: `Error occurred: ${e.message}` });
+  }
+};
+
 module.exports = {
   handleGetProfile,
   handleCreateProfile,
   handleUpdateFavs,
   handleDeleteFav,
   handleUpdateProfile,
+  handleGetProfileByUserId,
+  handleGetUserId,
 };

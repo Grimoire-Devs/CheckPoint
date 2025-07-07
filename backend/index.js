@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://checkpoint7.pages.dev"],
+    origin: ["http://localhost:4173", "https://checkpoint7.pages.dev"],
     credentials: true,
   })
 );

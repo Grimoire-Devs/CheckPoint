@@ -84,7 +84,7 @@ export default function SignIn() {
             </div>
           </div>
           <div className="flex flex-col space-y-4 mt-6">
-            <button onClick={handleLogin} disabled={clicked} className="btn btn-primary py-2">Sign in</button>
+            <button onClick={handleLogin} disabled={clicked} className="btn btn-primary py-2">{ clicked ? "Signing in..." : "Sign in"}</button>
             <div className="text-sm text-center text-white/70">
               Don&apos;t have an account?{" "}
               <Link to="/create-account" className="text-[#7000FF] hover:underline">

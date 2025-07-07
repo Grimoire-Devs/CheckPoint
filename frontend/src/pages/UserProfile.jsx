@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MainNav } from "../components/MainNav";
 import dayjs from "dayjs";
 import { GameCard } from "../components/GameCard";
@@ -31,17 +31,19 @@ import {
   Globe,
 } from "lucide-react";
 
-export default function Profile() {
+export default function UserProfile() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [userId, setUserId] = useState("");
   const baseUrl = import.meta.env.VITE_BASE_URL;
   const [activeTab, setActiveTab] = useState("overview");
   const [games, setGames] = useState([]);
   const [lists, setLists] = useState([]);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [favouritesGames, setFavouritesGames] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followingModalOpen, setFollowingModalOpen] = useState(false);
   const [followers, setFollowers] = useState([]);
@@ -56,12 +58,36 @@ export default function Profile() {
     email: user?.email || "",
     profileImage: user?.profileImage || null, // <-- add this
   });
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchUserId = async () => {
+      const response = await fetch(`${baseUrl}/profile/user/${id}/`, {
+        method: 'GET',
+      })
+      if (!response.ok) {
+        navigate("/");
+      }
+      const data = await response.json();
+      setUserId(data.userId);
+    }
+    if (id)
+      fetchUserId();
+    // setLoading(false);
+  }, [id]);
+
   const currentUser = JSON.parse(localStorage.getItem("user"))?._id;
+  useEffect(() => {
+    if (currentUser == userId)
+      navigate("/profile");
+    return;
+  }, [currentUser, userId]);
 
   const [favouriteGenre, setFavouriteGenre] = useState([]);
+
   useEffect(() => {
     const fetchFavGenre = async () => {
-      const response = await fetch(`${baseUrl}/favGenres/${user?._id}`, {
+      const response = await fetch(`${baseUrl}/favGenres/${userId}`, {
         credentials: "include",
       });
       console.log(response.status);
@@ -74,8 +100,8 @@ export default function Profile() {
         setFavouriteGenre([]);
       }
     };
-    if (user != null || user != undefined) fetchFavGenre();
-  }, [user, baseUrl]);
+    if (userId != null || userId != undefined) fetchFavGenre();
+  }, [userId, baseUrl]);
 
   useEffect(() => {
     if (user && profile) {
@@ -90,46 +116,7 @@ export default function Profile() {
   }, [user, profile]);
 
   const { theme } = useContext(ThemeContext);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchedGames, setSearchedGames] = useState([]);
 
-  const handleGameSearch = async () => {
-    if (!searchQuery.trim()) {
-      setSearchedGames([]);
-      return;
-    }
-    try {
-      const response = await fetch(
-        `${baseUrl}/search?q=${encodeURIComponent(searchQuery)}`
-      );
-      const data = await response.json();
-      console.log(data);
-      setSearchedGames(data.games || []);
-    } catch (error) {
-      console.error("Error searching games:", error);
-      setSearchedGames([]);
-    }
-  };
-  const [showGameSelector, setShowGameSelector] = useState(false);
-
-  const handleSelectGame = async (game) => {
-    const response = await fetch(`${baseUrl}/wishlist/add/`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ gameId: game._id }),
-    });
-    const data = await response.json();
-    console.log("wishlist", data);
-    setWishlist(data.wishlist);
-    setShowGameSelector(false);
-    setSearchQuery("");
-    setSearchedGames([]);
-  };
-
-  // Mock followers/following data - replace with actual API calls
   useEffect(() => {
     if (reviews) {
       const newGames = reviews.map((review) => review.review.game);
@@ -137,13 +124,13 @@ export default function Profile() {
     }
   }, [reviews]);
 
-  const handleCreateList = () => {
-    navigate("/lists", { state: { showInputs: true } });
-  };
+
   useEffect(() => {
-    setLoading(true);
+    if (!userId)
+      return;
+    // setLoading(true);
     async function fetchData() {
-      const response = await fetch(`${baseUrl}/profile`, {
+      const response = await fetch(`${baseUrl}/profile/${userId}`, {
         method: "GET",
         credentials: "include",
       });
@@ -164,58 +151,8 @@ export default function Profile() {
       setLists(result.profile.lists);
     });
     setLoading(false);
-  }, [baseUrl]);
+  }, [baseUrl, userId]);
 
-  const handleEditProfile = () => {
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveProfile = async () => {
-    const formData = new FormData();
-    formData.append("name", editFormData.name);
-    formData.append("userName", editFormData.userName);
-    formData.append("description", editFormData.description);
-    // formData.append("email", editFormData.email);
-    if (editFormData.profileImage instanceof File) {
-      formData.append("profileImage", editFormData.profileImage);
-    }
-
-    const response = await fetch(`${baseUrl}/profile/`, {
-      method: "PATCH",
-      credentials: "include",
-      body: formData,
-    });
-    const data = await response.json();
-    console.log(data);
-    if (response.ok) {
-      setProfile(data.profile);
-      setUser(data.profile.user);
-    } else {
-      setEditError(data.message);
-    }
-    setIsEditModalOpen(false);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // const handleFollowToggle = (userId, isCurrentlyFollowing) => {
-  //   // Add your follow/unfollow API call here
-  //   console.log(`${isCurrentlyFollowing ? "Unfollowing" : "Following"} user:`, userId)
-
-  //   // Update local state
-  //   setFollowers((prev) =>
-  //     prev.map((user) => (user.id === userId ? { ...user, isFollowing: !isCurrentlyFollowing } : user)),
-  //   )
-  //   setFollowing((prev) =>
-  //     prev.map((user) => (user.id === userId ? { ...user, isFollowing: !isCurrentlyFollowing } : user)),
-  //   )
-  // }
 
   const stats = {
     gamesPlayed: games.length || 0,
@@ -226,6 +163,20 @@ export default function Profile() {
     favourites: profile?.favourites?.length || 4,
     wishlist: wishlist?.length || 0,
   };
+
+
+  //   if (!profile) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center h-64 bg-muted rounded-lg shadow">
+  //       <User className="w-12 h-12 text-gray-400 mb-4" />
+  //       <span className="text-gray-600 text-lg font-semibold">Profile not found</span>
+  //       <span className="text-gray-400 text-sm mt-2">
+  //         The user profile you are looking for does not exist or could not be loaded.
+  //       </span>
+  //     </div>
+  //   );
+  // }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -233,6 +184,8 @@ export default function Profile() {
       </div>
     );
   }
+
+
 
   if (profile) {
     return (
@@ -327,38 +280,6 @@ export default function Profile() {
                     <div className="text-sm text-gray-500">Following</div>
                   </div>
                 </div>
-
-                {/* Action Buttons */}
-                {user?._id == currentUser && (
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleEditProfile}
-                      className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${theme === "dark"
-                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                        : "bg-purple-500 hover:bg-purple-600 text-white"
-                        }`}
-                    >
-                      <Edit3 className="w-4 h-4 inline mr-2" />
-                      Edit Profile
-                    </button>
-                    <button
-                      className={`px-4 py-3 rounded-xl transition-all ${theme === "dark"
-                        ? "bg-gray-800 hover:bg-gray-700 text-white"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                        }`}
-                    >
-                      <Settings className="w-4 h-4" />
-                    </button>
-                    <button
-                      className={`px-4 py-3 rounded-xl transition-all ${theme === "dark"
-                        ? "bg-gray-800 hover:bg-gray-700 text-white"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                        }`}
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -572,13 +493,6 @@ export default function Profile() {
                   <div className="space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-2xl font-bold">My Lists</h2>
-                      <button
-                        onClick={handleCreateList}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2"
-                      >
-                        <List className="w-4 h-4" />
-                        Create List
-                      </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -600,8 +514,8 @@ export default function Profile() {
                     {Array.isArray(favouritesGames) ? (
                       <FavoritesSection
                         initialFavorites={favouritesGames}
-                        onUpdateFavorites={setFavouritesGames}
-                        availableGames={games}
+                      // onUpdateFavorites={setFavouritesGames}
+                      // availableGames={games}
                       />
                     ) : (
                       <div className="text-center py-12">
@@ -618,10 +532,7 @@ export default function Profile() {
                   <div className="space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-2xl font-bold">My Reviews</h2>
-                      <button className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2">
-                        <Edit3 className="w-4 h-4" />
-                        Write Review
-                      </button>
+
                     </div>
 
                     <div className="space-y-6">
@@ -642,96 +553,7 @@ export default function Profile() {
                   <div className="space-y-6">
                     <div className="flex justify-between items-center">
                       <h2 className="text-2xl font-bold">Gaming Wishlist</h2>
-                      <button
-                        onClick={() => setShowGameSelector((p) => !p)}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2"
-                      >
-                        <BookHeart className="w-4 h-4" />
-                        Add Games
-                      </button>
-                      {showGameSelector && (
-                        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                          <div
-                            className={`rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto ${theme === "dark"
-                              ? "bg-[#151515] border border-[#252525]"
-                              : "bg-white border border-gray-200"
-                              }`}
-                          >
-                            <div className="flex justify-between items-center mb-6">
-                              <h3 className="text-xl font-bold">Select a Game</h3>
-                              <button
-                                onClick={() => setShowGameSelector(false)}
-                                className={`p-2 rounded-lg transition-colors ${theme === "dark"
-                                  ? "text-gray-400 hover:text-white hover:bg-[#252525]"
-                                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                  }`}
-                              >
-                                <X className="w-6 h-6" />
-                              </button>
-                            </div>
 
-                            <div className="mb-6">
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  placeholder="Search games..."
-                                  value={searchQuery}
-                                  onChange={(e) => setSearchQuery(e.target.value)}
-                                  className="input w-full pr-10"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") handleGameSearch();
-                                  }}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={handleGameSearch}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                  tabIndex={-1}
-                                >
-                                  <Search className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            {searchQuery && searchedGames.length === 0 && (
-                              <div className="text-center py-8">
-                                <p className="text-gray-500">No games found.</p>
-                              </div>
-                            )}
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                              {searchedGames.map((game) => (
-                                <button
-                                  key={game._id}
-                                  onClick={() => handleSelectGame(game)}
-                                  className={`aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all duration-200 hover:transform hover:scale-105 ${theme === "dark"
-                                    ? "border-[#252525] hover:border-[#7000FF]"
-                                    : "border-gray-200 hover:border-[#7000FF]"
-                                    } relative`} // <-- add relative here
-                                >
-                                  <img
-                                    src={
-                                      game.coverImage ||
-                                      "/placeholder.svg?height=400&width=300"
-                                    }
-                                    alt={game.title}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.target.src =
-                                        "/placeholder.svg?height=400&width=300";
-                                    }}
-                                  />
-                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                                    <p className="text-xs text-white font-medium truncate">
-                                      {game.title}
-                                    </p>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -750,205 +572,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-
-        {/* Edit Profile Modal */}
-        {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div
-              className={`w-full max-w-2xl rounded-2xl p-6 ${theme === "dark"
-                ? "bg-gray-900 border border-gray-800"
-                : "bg-white border border-gray-200"
-                }`}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Edit Profile</h2>
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-gray-300">
-                      <img
-                        src={
-                          editFormData.profileImage instanceof File
-                            ? URL.createObjectURL(editFormData.profileImage)
-                            : editFormData.profileImage ||
-                            "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740"
-                        }
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <label className="absolute -bottom-1 -right-1 bg-purple-500 text-white p-1.5 rounded-full hover:bg-purple-600 cursor-pointer">
-                      <Upload className="w-3 h-3" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            setEditFormData((prev) => ({
-                              ...prev,
-                              profileImage: e.target.files[0],
-                            }));
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Profile Photo</h3>
-                    <p className="text-sm text-gray-500">
-                      Upload a new profile picture
-                    </p>
-                    <button
-                      className="text-purple-500 text-sm hover:text-purple-600 mt-1"
-                      type="button"
-                      onClick={() => {
-                        // Trigger file input click
-                        document
-                          .querySelector('input[type="file"][accept^="image"]')
-                          .click();
-                      }}
-                    >
-                      Change Photo
-                    </button>
-                    {editFormData.profileImage && (
-                      <button
-                        className="ml-2 text-xs text-red-500 hover:underline"
-                        type="button"
-                        onClick={() =>
-                          setEditFormData((prev) => ({
-                            ...prev,
-                            profileImage: null,
-                          }))
-                        }
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Form Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={editFormData.name}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border ${theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300"
-                        }`}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      name="userName"
-                      value={editFormData.userName}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border ${theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300"
-                        }`}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={editFormData.email}
-                      disabled
-                      className={`w-full px-4 py-3 rounded-xl border ${theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300"
-                        }`}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      value={editFormData.description}
-                      onChange={handleInputChange}
-                      rows={3}
-                      maxlength="400"
-                      className={`w-full px-4 py-3 rounded-xl border ${theme === "dark"
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300"
-                        }`}
-                      placeholder="Tell us about yourself and your gaming interests...(Not more than 400 characters)"
-                    />
-                  </div>
-                  {/* <div>
-                  <label className="block text-sm font-medium mb-2">Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={editFormData.location}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
-                    placeholder="City, Country"
-                  />
-                </div> */}
-                  {/* <div>
-                  <label className="block text-sm font-medium mb-2">Website</label>
-                  <input
-                    type="url"
-                    name="website"
-                    value={editFormData.website}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-300"}`}
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div> */}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={handleSaveProfile}
-                    className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={() => setIsEditModalOpen(false)}
-                    className={`px-6 py-3 rounded-xl border ${theme === "dark"
-                      ? "border-gray-700 hover:bg-gray-800"
-                      : "border-gray-300 hover:bg-gray-50"
-                      }`}
-                  >
-                    Cancel
-                  </button>
-                </div>
-                {editError && <div className="text-red-500">{editError}</div>}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Followers Modal */}
         {followersModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

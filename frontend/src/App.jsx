@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword"
 import SearchPage from "./pages/SearchPage"
 import Lists from "./pages/Lists";
 import { MainNav } from "./components/MainNav"
+import UserProfile from "./pages/UserProfile";
 import ListDetails from "./pages/ListDetails";
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/create-account" element={<CreateAccount />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<UserProfile />} />
           <Route path="/reviews/:id" element={<ReviewsRating />} />
           <Route path="/testing" element={<Testing/>} />
           <Route path="/forgot-password" element={<ForgotPassword/>}/>
