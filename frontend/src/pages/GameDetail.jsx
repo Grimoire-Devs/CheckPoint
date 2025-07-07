@@ -708,12 +708,12 @@ export default function GameDetail() {
                   {[
                     {
                       label: "Total Reviews",
-                      value: game?.ratings_count.toLocaleString(),
+                      value: game?.ratings_count?.toLocaleString?.() || "0",
                       icon: "📊",
                     },
                     {
                       label: "Average Rating",
-                      value: game?.rating,
+                      value: game?.rating || "N/A",
                       icon: "⭐",
                     },
                     {
@@ -721,14 +721,14 @@ export default function GameDetail() {
                       value: `${Math.round(
                         ((ratingDistribution[0]?.count +
                           ratingDistribution[1]?.count) /
-                          game?.ratings_count) *
+                          (game?.ratings_count || 1)) *
                           100
                       )}%`,
                       icon: "👍",
                     },
                     {
                       label: "Metacritic Score",
-                      value: game?.metacritic,
+                      value: game?.metacritic || "N/A",
                       icon: "🏆",
                     },
                   ].map((stat, index) => (

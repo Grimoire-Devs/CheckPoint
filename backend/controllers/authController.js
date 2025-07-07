@@ -136,22 +136,20 @@ exports.forgotPassword = async (req, res) => {
     user.passwordResetToken = token;
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/reset-password/${token}`;
-    // Send email with resetUrl
+    
+    // Send email with just the token
     await sendEmail(
       email,
       "Reset Your Password",
-      `<p>You requested to reset your password. Click the link below:</p>
-      <a href="${resetUrl}">Reset Password</a>
-      <p>This link will expire in 1 hour.</p>`
+      `<p>You requested to reset your password. Use the following token to reset your password:</p>
+      <h2 style="background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin: 20px 0;">${token}</h2>
+      <p>This token will expire in 1 hour.</p>
+      <p>If you didn't request this password reset, please ignore this email.</p>`
     );
 
     res.status(200).json({
       success: true,
-      message: `Password reset link sent to ${email}`,
-      resetUrl,
+      message: `Password reset token sent to ${email}`,
     });
   } catch (error) {
     console.error(error);
