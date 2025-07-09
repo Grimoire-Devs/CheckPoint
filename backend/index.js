@@ -69,8 +69,12 @@ app.listen(PORT, () => {
 });
 
 cron.schedule("20 0 * * *", async () => {
-  console.log("Updating Game Data at 12:20 AM");
-  await fetchAndUpdate(5);
+  try {
+    console.log("Updating Game Data at 12:20 AM");
+    await fetchAndUpdate(5);
+  } catch (e) {
+    console.error("Failed to update game data", e.message);
+  }
 });
 
 cron.schedule("*/14 * * * *", async () => {
