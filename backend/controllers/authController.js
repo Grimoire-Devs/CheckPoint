@@ -80,7 +80,7 @@ exports.signin = async (req, res) => {
     const userObj = user.toObject();
     userObj.token = token;
     userObj.password = undefined;
-    // console.log("User logged in successfully", userObj);
+    console.log("User logged in successfully", userObj);
 
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
